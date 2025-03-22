@@ -1,5 +1,5 @@
 import React from "react";
-import { DNA } from "react-loader-spinner";
+
 
 function Loader({ text = "Loading..." }) {
   return (
