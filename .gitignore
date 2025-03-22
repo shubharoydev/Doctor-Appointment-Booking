@@ -1,6 +1,4 @@
-# Ignore environment variables
-frontend/.env
-backend/.env
+
 
 # Node modules
 node_modules/
