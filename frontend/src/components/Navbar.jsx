@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 function Navbar() {
@@ -102,14 +102,14 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-md p-4 text-black text-10px ">
+    <nav className="bg-white shadow-md p-4 text-black text-10px">
       <div className="container mx-auto flex justify-between items-center">
-        <a href="/" className="text-xl font-bold ">Doctor App</a>
+        <Link to="/" className="text-xl font-bold">Doctor App</Link>
         <div className="flex space-x-4">
-          <a href="/" className="hover:underline">Home</a>
-          <a href="/all-doctors" className="hover:underline">All Doctors</a>
-          <a href="/about" className="hover:underline">About</a>
-          <a href="/contact" className="hover:underline">Contact</a>
+          <Link to="/" className="hover:underline">Home</Link>
+          <Link to="/all-doctors" className="hover:underline">All Doctors</Link>
+          <Link to="/about" className="hover:underline">About</Link>
+          <Link to="/contact" className="hover:underline">Contact</Link>
           {isAuthenticated ? (
             <div className="relative">
               <button
