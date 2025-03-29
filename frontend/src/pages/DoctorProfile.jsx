@@ -190,50 +190,9 @@ function DoctorProfile() {
           </div>
         </section>
 
-        <section className="mt-8">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Booked Appointments</h3>
-          {appointments.length > 0 ? (
-            <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="py-3 px-4 border-b text-left text-gray-600 font-semibold">User Name</th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600 font-semibold">Day</th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600 font-semibold">Place</th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600 font-semibold">Time Interval</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.map((appointment, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4">{appointment.user.name}</td>
-                    <td className="py-3 px-4">{appointment.day}</td>
-                    <td className="py-3 px-4">{appointment.place}</td>
-                    <td className="py-3 px-4">
-                      {`${convertTo12Hour(appointment.timeInterval.start)} - ${convertTo12Hour(appointment.timeInterval.end)}`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="text-gray-600 bg-gray-50 p-4 rounded-lg">No appointments booked yet.</p>
-          )}
-        </section>
+ 
 
-        <div className="mt-6 flex gap-4">
-          <button
-            onClick={handleEdit}
-            className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-          >
-            Edit Profile
-          </button>
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            Delete Profile
-          </button>
-        </div>
+       
       </div>
     </SidebarLayout>
   );
