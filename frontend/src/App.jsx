@@ -54,8 +54,7 @@ function App() {
               });
               console.log('Doctor profile exists in App:', doctorResponse.data); // Debug
               setHasProfile(true);
-              
-              // Remove automatic redirect to profile when on Home page ('/')
+  
               // Only redirect if trying to access profile without having one
               if (window.location.pathname === '/profile' && !hasProfile) {
                 navigate('/register');

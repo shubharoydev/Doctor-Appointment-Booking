@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import QRCode from 'qrcode.react';
+import {QRCode} from 'react-qr-code';
 
 import { FaWhatsapp, FaFacebook, FaInstagram, FaDownload } from 'react-icons/fa';
 
@@ -106,4 +106,4 @@ function QRCodeGenerator({ url, doctorName }) {
   );
 }
 
-export default QRCodeGenerator; 
+export default QRCodeGenerator;           

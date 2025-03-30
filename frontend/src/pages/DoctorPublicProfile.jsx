@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../components/Loader';
-import QRCode from 'qrcode.react';
+// import {QRCode} from 'qrcode.react';
 import { FaWhatsapp, FaFacebook, FaInstagram, FaLink, FaQrcode } from 'react-icons/fa';
 import Popup from '../components/Popup';
 
