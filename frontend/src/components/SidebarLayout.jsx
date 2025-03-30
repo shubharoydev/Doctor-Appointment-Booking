@@ -1,105 +1,143 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import QRCodeGenerator from './QRCodeGenerator';
 
-function SidebarLayout({ children, profileId, userRole, onDelete }) {
+function SidebarLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState(() => {
-    // Set active tab based on current path
-    if (location.pathname.includes('/dashboard')) return 'dashboard';
-    if (location.pathname.includes('/edit')) return 'edit';
-    return 'profile';
-  });
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [profileId, setProfileId] = useState(null);
+  const [doctorName, setDoctorName] = useState('');
+  const [isDoctor, setIsDoctor] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const role = localStorage.getItem('userRole');
+  
+  useEffect(() => {
+    const pathParts = location.pathname.split('/');
+    const path = pathParts[1];
+    const id = pathParts[2];
+    
+    if (path === 'profile') {
+      setActiveTab('profile');
+    } else if (path === 'dashboard') {
+      setActiveTab('dashboard');
+    }
+    
+    if (id) {
+      setProfileId(id);
+      const fetchProfileName = async () => {
+        try {
+          const token = localStorage.getItem('accessToken');
+          if (role === 'doctor') {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/${id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              setDoctorName(data.name);
+              setIsDoctor(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+        }
+      };
+      fetchProfileName();
+    }
+  }, [location, role]);
 
   const handleTabClick = (tab) => {
-    setActiveTab(tab);
+    if (tab === 'dashboard') {
+      navigate(`/dashboard/${profileId}`);
+    } else if (tab === 'profile') {
+      navigate(`/profile/${profileId}`);
+    } else if (tab === 'edit') {
+      if (role === 'doctor') {
+        navigate(`/edit-doctor/${profileId}`);
+      } else {
+        navigate(`/register?id=${profileId}`);
+      }
+    } else if (tab === 'qrcode') {
+      setShowQRCode(!showQRCode);
+    } else if (tab === 'delete') {
+      const confirmDelete = window.confirm('Are you sure you want to delete your profile?');
+      if (confirmDelete) {
+        // Logic to delete profile
+        console.log('Delete profile:', profileId);
+      }
+    }
     
-    switch (tab) {
-      case 'profile':
-        navigate(`/profile/${profileId}`);
-        break;
-      case 'edit':
-        console.log('Edit tab clicked, navigating to:', `/edit-doctor/${profileId}`);
-        if (userRole === 'doctor') {
-          navigate(`/edit-doctor/${profileId}`);
-        } else {
-          navigate(`/register?id=${profileId}`);
-        }
-        break;
-      case 'dashboard':
-        navigate(`/dashboard/${profileId}`);
-        break;
-      case 'delete':
-        if (window.confirm('Are you sure you want to delete this profile?')) {
-          onDelete();
-        }
-        break;
-      default:
-        break;
+    if (tab !== 'qrcode') {
+      setActiveTab(tab);
     }
   };
 
+  const publicProfileUrl = isDoctor ? `${window.location.origin}/doctors/${profileId}` : '';
+
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto p-4">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar */}
-        <div className="w-full md:w-1/4">
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              {userRole === 'doctor' ? 'Doctor' : 'User'} Menu
-            </h3>
-            <ul className="space-y-2">
-              <li>
+        <div className="md:w-1/4 lg:w-1/5">
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold mb-4">Profile Menu</h3>
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={() => handleTabClick('dashboard')}
+                className={`p-2 rounded-md text-left ${
+                  activeTab === 'dashboard' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                }`}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => handleTabClick('profile')}
+                className={`p-2 rounded-md text-left ${
+                  activeTab === 'profile' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                }`}
+              >
+                Profile
+              </button>
+              <button
+                onClick={() => handleTabClick('edit')}
+                className={`p-2 rounded-md text-left ${
+                  activeTab === 'edit' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                }`}
+              >
+                Edit Profile
+              </button>
+              {isDoctor && (
                 <button
-                  onClick={() => handleTabClick('profile')}
-                  className={`w-full text-left px-4 py-2 rounded-md ${
-                    activeTab === 'profile'
-                      ? 'bg-blue-500 text-white'
-                      : 'hover:bg-gray-100'
+                  onClick={() => handleTabClick('qrcode')}
+                  className={`p-2 rounded-md text-left ${
+                    showQRCode ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
                   }`}
                 >
-                  Profile
+                  QR Code
                 </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleTabClick('edit')}
-                  className={`w-full text-left px-4 py-2 rounded-md ${
-                    activeTab === 'edit'
-                      ? 'bg-blue-500 text-white'
-                      : 'hover:bg-gray-100'
-                  }`}
-                >
-                  Edit Profile
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleTabClick('dashboard')}
-                  className={`w-full text-left px-4 py-2 rounded-md ${
-                    activeTab === 'dashboard'
-                      ? 'bg-blue-500 text-white'
-                      : 'hover:bg-gray-100'
-                  }`}
-                >
-                  Dashboard
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleTabClick('delete')}
-                  className="w-full text-left px-4 py-2 rounded-md text-red-500 hover:bg-red-50"
-                >
-                  Delete Profile
-                </button>
-              </li>
-            </ul>
+              )}
+              <button
+                onClick={() => handleTabClick('delete')}
+                className="p-2 rounded-md text-left text-red-500 hover:bg-red-50"
+              >
+                Delete Profile
+              </button>
+            </div>
           </div>
+          
+          {isDoctor && showQRCode && (
+            <div className="mt-4">
+              <QRCodeGenerator 
+                url={publicProfileUrl} 
+                doctorName={doctorName}
+              />
+            </div>
+          )}
         </div>
         
-        {/* Main Content */}
-        <div className="w-full md:w-3/4">
-          {children}
+        <div className="md:w-3/4 lg:w-4/5">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            {children}
+          </div>
         </div>
       </div>
     </div>
