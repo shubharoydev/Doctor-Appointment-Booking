@@ -1,261 +1,162 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { FaArrowRight } from 'react-icons/fa';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import Loader from '../components/Loader';
 
-// Import images
-import image1 from "../assets/images/image1.png";
-import image2 from "../assets/images/image2.png";
-import image3 from "../assets/images/image3.png";
-import image4 from "../assets/images/image4.png";
-import image5 from "../assets/images/image5.jpg";
+// Icons for features
+import { FaCalendarCheck, FaVideo, FaHeartbeat, FaAmbulance, FaLungs, FaBed } from 'react-icons/fa';
 
-const images = [
-  { src: image1, buttonText: "Book Now", link: "/book-appointment" },
-  { src: image2, buttonText: "Order Now", link: "/order-now" },
-  { src: image3, buttonText: "Consult Now", link: "/consult-now" },
-  { src: image4, buttonText: "Consult Now", link: "/call-now" },
-];
-
-const medicalSpecialties = [
-  "Neurologist", "Orthopedic", "Cardiologist", "Dermatologist", "Pediatrician",
-  "Gynecologist", "Oncologist", "Psychiatrist", "Radiologist", "Urologist",
-  "Endocrinologist", "Nephrologist", "Pulmonologist",
-  "Rheumatologist", "Hematologist", "Allergist", "Otolaryngologist", "Ophthalmologist",
-  "Dentist", "Physiotherapist", "Dietitian", "Chiropractor", "Surgeon", "Anesthesiologist"
-];
-
-const ROW_SIZE = 4; // Number of specialties per row
-const DEFAULT_ROWS = 4; // Number of rows visible by default
-
-const Home = () => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showAllSpecialties, setShowAllSpecialties] = useState(false);
-
-  const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
+function Home() {
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      nextImage();
-    }, 6500);
-    return () => clearInterval(interval);
+    const fetchDoctors = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors`);
+        setDoctors(response.data);
+      } catch (err) {
+        setError('Failed to load doctors');
+        console.error('Error fetching doctors:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctors();
   }, []);
 
-  const visibleSpecialtiesCount = showAllSpecialties
-    ? medicalSpecialties.length
-    : ROW_SIZE * DEFAULT_ROWS;
+  if (loading) return <Loader />;
+  if (error) return <div className="text-red-500 text-center">{error}</div>;
+
+  // Features data
+  const features = [
+    {
+      icon: <FaCalendarCheck className="text-4xl text-blue-600" />,
+      title: 'Appointment Book',
+      description: 'Schedule your visit with top doctors easily.',
+      link: '/appointments',
+    },
+    {
+      icon: <FaVideo className="text-4xl text-blue-600" />,
+      title: 'Online Consult',
+      description: 'Connect with specialists from anywhere.',
+      link: '/consult',
+    },
+    {
+      icon: <FaHeartbeat className="text-4xl text-blue-600" />,
+      title: 'Book Health Checkup',
+      description: 'Comprehensive health packages for you.',
+      link: '/health-checkup',
+    },
+    {
+      icon: <FaAmbulance className="text-4xl text-blue-600" />,
+      title: 'Instant Ambulance',
+      description: 'Emergency transport at your fingertips.',
+      link: '/ambulance',
+    },
+    {
+      icon: <FaLungs className="text-4xl text-blue-600" />,
+      title: 'Get Your Oxygen',
+      description: 'Reliable oxygen supply when needed.',
+      link: '/oxygen',
+    },
+    {
+      icon: <FaBed className="text-4xl text-blue-600" />,
+      title: 'Bed Booking',
+      description: 'Reserve hospital beds in advance.',
+      link: '/bed-booking',
+    },
+  ];
 
   return (
-    <div className="relative ">
-      {/* Slider Container */}
-      <div className="relative w-full h-[490px] overflow-hidden" style={{ maxWidth: "1600px", margin: "0 auto" }}>
-        {images.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentImageIndex ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <div className="relative w-full h-full">
-              {/* Image with Overlay for Better Text Contrast */}
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative h-[60vh] md:h-[80vh]">
+        <Swiper
+          modules={[Autoplay, Pagination, Navigation]}
+          spaceBetween={0}
+          slidesPerView={1}
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          pagination={{ clickable: true }}
+          navigation
+          className="h-full"
+        >
+          <SwiperSlide>
+            <div className="relative h-full">
               <img
-                src={image.src}
-                alt={`Slide ${index + 1}`}
-                className="w-full h-full object-contain"
-                style={{ maxWidth: "1600px", maxHeight: "490px" }}
+                src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                alt="Healthcare"
+                className="w-full h-full object-cover"
               />
-            
-              {/* Text and Button */}
-              <div className="absolute top-95 left-220 transform -translate-x-1/2 -translate-y-1/2 text-center text-white">
-                <h2 className="text-2xl md:text-4xl font-bold mb-4">{image.text}</h2>
-                <Link
-                  to={image.link}
-                  className="bg-blue-600 text-white px-5 py-3 rounded-full hover:bg-blue-700 transition-colors"
-                >
-                  {image.buttonText}
-                </Link>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white px-4">
+                  <h1 className="text-4xl md:text-6xl font-bold mb-4 text-black">Your Health, Our Priority</h1>
+                  <p className="text-xl md:text-2xl mb-8 text-black">Find the best doctors and book appointments easily</p>
+                  <Link
+                    to="/doctors"
+                    className="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center"
+                  >
+                    Find Doctors <FaArrowRight className="ml-2" />
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-
-        {/* Previous Button */}
-        <button
-          onClick={prevImage}
-          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-50 p-3 rounded-full hover:bg-opacity-75 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-
-        {/* Next Button */}
-        <button
-          onClick={nextImage}
-          className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-50 p-3 rounded-full hover:bg-opacity-75 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Our Main Features Section */}
-      <div className="container mx-auto mt-12 px-4">
-        <h2 className="text-3xl font-bold text-center mb-8">Our Main Features</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Feature Boxes */}
-          <Link
-            to="/about"
-            className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Book Appointment</h3>
-            <p className="text-gray-600">Schedule appointments with doctors easily.</p>
-          </Link>
-          <Link
-            to="/about"
-            className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Consult Online</h3>
-            <p className="text-gray-600">Get medical advice from the comfort of your home.</p>
-          </Link>
-          <Link
-            to="/about"
-            className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Bed Booking</h3>
-            <p className="text-gray-600">Book hospital beds for emergencies.</p>
-          </Link>
-          <Link
-            to="/about"
-            className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Get Your Oxygen</h3>
-            <p className="text-gray-600">Order oxygen supplies for critical needs.</p>
-          </Link>
-          <Link
-            to="/about"
-            className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Book Health Check-Up</h3>
-            <p className="text-gray-600">Schedule comprehensive health check-ups.</p>
-          </Link>
-          <Link
-            to="/about"
-            className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Instant Ambulance</h3>
-            <p className="text-gray-600">Call for an ambulance instantly in emergencies.</p>
-          </Link>
-        </div>
-      </div>
-
-      {/* Explore Our Centers of Clinical Excellence Section */}
-      <div className="container mx-auto mt-12 px-4">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          Explore Our Centers of Clinical Excellence
-        </h2>
-        <div className="flex flex-col lg:flex-row gap-4"> {/* Reduced gap from 8 to 4 */}
-          {/* Image Section - Adjusted Positioning */}
-          <div className="w-full lg:w-1/2 flex justify-center">
-            <img
-              src={image5}
-              alt="Clinical Excellence"
-              className="w-3/4 h-auto rounded-lg shadow-md"
-              style={{ maxWidth: "612px", maxHeight: "408px" }} // Set to actual size
-            />
-          </div>
-
-          {/* Medical Specialties Section */}
-          <div className="w-full lg:w-1/2">
-            <div className="grid grid-cols-4 gap-4">
-              {medicalSpecialties
-                .slice(0, visibleSpecialtiesCount)
-                .map((specialty, index) => {
-                  // Map specialties to emojis/icons for a professional look
-                  const specialtyIcon = {
-                    Neurologist: "🧠",
-                    Orthopedic: "🦴",
-                    Cardiologist: "❤️",
-                    Dermatologist: "🩺",
-                    Pediatrician: "👶",
-                    Gynecologist: "♀️",
-                    Oncologist: "🎗️",
-                    Psychiatrist: "🧘",
-                    Radiologist: "📷",
-                    Urologist: "💧",
-                    Endocrinologist: "⏳",
-                    Nephrologist: "🫀",
-                    Pulmonologist: "🌬️",
-                    Rheumatologist: "🤲",
-                    Hematologist: "🩸",
-                    Allergist: "🌸",
-                    Otolaryngologist: "👂",
-                    Ophthalmologist: "👁️",
-                    Dentist: "🦷",
-                    Physiotherapist: "🏋️",
-                    Dietitian: "🥗",
-                    Chiropractor: "💆",
-                    Surgeon: "🔪",
-                    Anesthesiologist: "💉",
-                  }[specialty] || "";
-
-                  return (
-                    <Link
-                      key={index}
-                      to="/about"
-                      className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow flex items-center justify-center min-h-[120px]" // Increased size
-                    >
-                      <h3 className="text-base font-semibold break-words">
-                        {specialtyIcon} {specialty}
-                      </h3>
-                    </Link>
-                  );
-                })}
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="relative h-full">
+              <img
+                src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="Medical Care"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white px-4">
+                  <h1 className="text-4xl md:text-6xl font-bold mb-4 text-black">Expert Medical Care</h1>
+                  <p className="text-xl md:text-2xl mb-8 text-black">Access top specialists in various fields</p>
+                  <Link
+                    to="/doctors"
+                    className="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center"
+                  >
+                    Find Doctors <FaArrowRight className="ml-2" />
+                  </Link>
+                </div>
+              </div>
             </div>
+          </SwiperSlide>
+        </Swiper>
+      </section>
 
-            {/* View More / View Less Button */}
-            <div className="text-center mt-6">
-              <button
-                onClick={() => setShowAllSpecialties(!showAllSpecialties)}
-                className="text-black hover:underline font-bold"
+      {/* Features Section */}
+      <section className="py-12 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">Our Services</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <Link
+                to={feature.link}
+                key={index}
+                className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105"
+                style={{ perspective: '1000px' }}
               >
-                {showAllSpecialties ? "View Less" : "View All"}
-              </button>
-            </div>
+                <div className="p-6 text-center transform transition-transform duration-300 group-hover:rotate-y-5">
+                  <div className="mb-4">{feature.icon}</div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
-};
+}
 
 export default Home;

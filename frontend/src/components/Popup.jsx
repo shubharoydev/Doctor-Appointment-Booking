@@ -1,5 +1,64 @@
-function Popup({ isOpen, onClose, title, message, type = 'info', onConfirm, confirmText = 'OK', showCancel = false }) {
-  if (!isOpen) return null;
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useEffect } from 'react';
+
+function ToastNotification({ isOpen, onClose, title, message, type = 'info', onConfirm, confirmText = 'OK', showCancel = false }) {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const toastOptions = {
+      position: "top-center",
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false,
+      closeButton: false,
+      theme: "light",
+      toastId: title, // Prevent duplicate toasts
+    };
+
+    const renderContent = () => (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span className={`text-2xl ${getColor()}`}>
+            {getIcon()}
+          </span>
+          <h3 className="text-lg font-semibold">{title}</h3>
+        </div>
+        <p className="text-gray-700">{message}</p>
+        <div className="flex gap-2 mt-2 justify-end">
+          {showCancel && (
+            <button
+              onClick={() => {
+                toast.dismiss(title);
+                onClose();
+              }}
+              className="bg-gray-500 text-white py-1 px-3 rounded hover:bg-gray-600 text-sm"
+            >
+              Cancel
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (onConfirm) onConfirm();
+              toast.dismiss(title);
+              onClose();
+            }}
+            className={`py-1 px-3 rounded text-white text-sm ${
+              type === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+            }`}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    );
+
+    toast(renderContent, toastOptions);
+
+    return () => {
+      toast.dismiss(title);
+    };
+  }, [isOpen, title, message, type, onConfirm, confirmText, showCancel, onClose]);
 
   const getIcon = () => {
     switch (type) {
@@ -27,34 +86,7 @@ function Popup({ isOpen, onClose, title, message, type = 'info', onConfirm, conf
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className={`text-4xl mb-4 ${getColor()}`}>{getIcon()}</div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-700 mb-6">{message}</p>
-        <div className="flex gap-4">
-          {showCancel && (
-            <button
-              onClick={onClose}
-              className="flex-1 bg-gray-500 text-white py-2 rounded hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-          )}
-          <button
-            onClick={() => {
-              if (onConfirm) onConfirm();
-              onClose();
-            }}
-            className={`flex-1 ${type === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white py-2 rounded`}
-          >
-            {confirmText}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  return <ToastContainer />;
 }
 
-export default Popup; 
+export default ToastNotification;

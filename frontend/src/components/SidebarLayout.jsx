@@ -112,7 +112,7 @@ function SidebarLayout({ children }) {
                     showQRCode ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
                   }`}
                 >
-                  QR Code
+                  Dashboard
                 </button>
               )}
               <button
