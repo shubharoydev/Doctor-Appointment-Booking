@@ -20,6 +20,7 @@ function Navbar() {
           const userResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/user`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+          console.log('User API response:', userResponse.data); // Added response log
           const role = userResponse.data.role;
           setUserRole(role);
           localStorage.setItem('userRole', role);
@@ -30,9 +31,11 @@ function Navbar() {
               const doctorResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/by-user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
+              console.log('Doctor profile API response:', doctorResponse.data); // Added response log
               setHasProfile(true);
               setProfileId(doctorResponse.data._id);
             } catch (error) {
+              console.error('Error fetching doctor profile:', error); // Existing error log
               if (error.response?.status === 404) setHasProfile(false);
               else throw error;
             }
@@ -40,6 +43,7 @@ function Navbar() {
             const userProfileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users`, {
               headers: { Authorization: `Bearer ${token}` },
             });
+            console.log('User profile API response:', userProfileResponse.data); // Added response log
             if (userProfileResponse.data) {
               setHasProfile(true);
               setProfileId(userProfileResponse.data._id);
@@ -48,7 +52,7 @@ function Navbar() {
             }
           }
         } catch (error) {
-          console.error('Error checking user and profile:', error);
+          console.error('Error checking user and profile:', error); // Existing error log
           if (error.response?.status === 404) setHasProfile(false);
         }
       };
@@ -177,7 +181,7 @@ function Navbar() {
             className="focus:outline-none"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h celular16m-7 6h7" />
             </svg>
           </button>
         </div>

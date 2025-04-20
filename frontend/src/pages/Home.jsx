@@ -1,40 +1,15 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { FaArrowRight } from 'react-icons/fa';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-import Loader from '../components/Loader';
 
 // Icons for features
 import { FaCalendarCheck, FaVideo, FaHeartbeat, FaAmbulance, FaLungs, FaBed } from 'react-icons/fa';
 
 function Home() {
-  const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors`);
-        setDoctors(response.data);
-      } catch (err) {
-        setError('Failed to load doctors');
-        console.error('Error fetching doctors:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDoctors();
-  }, []);
-
-  if (loading) return <Loader />;
-  if (error) return <div className="text-red-500 text-center">{error}</div>;
-
   // Features data
   const features = [
     {
@@ -74,6 +49,9 @@ function Home() {
       link: '/bed-booking',
     },
   ];
+
+  // Console log to confirm component rendering (no API calls to log here)
+  console.log('Home component rendered successfully');
 
   return (
     <div className="min-h-screen">
