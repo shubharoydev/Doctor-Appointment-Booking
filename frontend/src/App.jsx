@@ -33,14 +33,15 @@ function App() {
     const checkProfile = async () => {
       const token = localStorage.getItem('accessToken');
       const role = localStorage.getItem('userRole');
+      console.log('Checking authentication:', { token, role, path: window.location.pathname }); // Log routing
       if (token && role) {
         try {
           const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/user`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const user = response.data;
-          console.log('User data fetched in App:', user); // Debug
-          
+          console.log('User data fetched:', user);
+
           const userId = user._id || user.id;
           setUserId(userId);
           setUserRole(role);
@@ -48,46 +49,37 @@ function App() {
 
           if (role === 'doctor') {
             try {
-              console.log('Fetching doctor profile for user ID:', userId); // Debug
+              console.log('Fetching doctor profile for user ID:', userId);
               const doctorResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/by-user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
-              console.log('Doctor profile exists in App:', doctorResponse.data); // Debug
+              console.log('Doctor profile exists:', doctorResponse.data);
               setHasProfile(true);
-  
-              // Only redirect if trying to access profile without having one
-              if (window.location.pathname === '/profile' && !hasProfile) {
-                navigate('/register');
-              }
             } catch (err) {
-              console.log('No doctor profile found in App:', err.response?.status); // Debug
+              console.log('No doctor profile found:', err.response?.data || err.message);
               setHasProfile(false);
-              
-              // Redirect to register only if trying to access profile page
               if (window.location.pathname === '/profile') {
                 navigate('/register');
               }
             }
           } else if (role === 'user') {
             try {
-              console.log('Fetching user profile for user ID:', userId); // Debug
+              console.log('Fetching user profile for user ID:', userId);
               const userProfileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
-              console.log('User profile exists in App:', userProfileResponse.data); // Debug
+              console.log('User profile exists:', userProfileResponse.data);
               setHasProfile(true);
             } catch (err) {
-              console.log('No user profile found in App:', err.response?.data || err.message); // Debug
+              console.log('No user profile found:', err.response?.data || err.message);
               setHasProfile(false);
-              
-              // Redirect to register only if trying to access profile page
               if (window.location.pathname === '/profile') {
                 navigate('/register');
               }
             }
           }
         } catch (error) {
-          console.error('Auth check error:', error.response?.data || error.message); // Debug
+          console.error('Auth check error:', error.response?.data || error.message);
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('userRole');

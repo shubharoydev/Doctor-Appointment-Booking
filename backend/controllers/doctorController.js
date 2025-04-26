@@ -1,178 +1,200 @@
 const Doctor = require('../models/Doctor');
 const User = require('../models/User');
+const redisClient = require('../config/redis');
 
+// Create doctor
 const createDoctor = async (req, res) => {
-  console.log('Create doctor request received:', req.body, 'File:', req.file); // Debug
-  const user = req.user;
-
+  console.log('Create doctor request received:', {
+    body: req.body,
+    file: req.file,
+    user: req.user._id,
+  });
   try {
-    const doctorData = { ...req.body, user: user._id };
-    
-    // Handle file upload
+    const doctorData = { ...req.body, user: req.user._id };
     if (req.file) {
-      // If using Cloudinary, the file path will be in req.file.path
-      doctorData.picture = req.file.path; // Cloudinary URL
-      console.log('Image uploaded to Cloudinary:', req.file.path); // Debug
+      doctorData.picture = req.file.path;
+      console.log('Image uploaded to Cloudinary:', req.file.path);
     } else {
-      console.log('No file uploaded in createDoctor'); // Debug
+      console.log('No file uploaded in createDoctor');
     }
-    
-    // Handle schedule data
     if (doctorData.schedule) {
       doctorData.schedule = typeof doctorData.schedule === 'string'
         ? JSON.parse(doctorData.schedule)
         : doctorData.schedule;
+      console.log('Parsed schedule:', doctorData.schedule);
     }
-    
     const doctor = await Doctor.create(doctorData);
-    console.log('Doctor created:', doctor); // Debug full doctor object
+    console.log('Doctor created successfully:', doctor);
     res.status(201).json(doctor);
   } catch (error) {
-    console.error('Create doctor error:', error.message, error.stack); // Debug
+    console.error('Create doctor error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: 'Failed to create doctor', error: error.message });
   }
 };
 
+// Get doctor by ID
 const getDoctor = async (req, res) => {
-  console.log('Get doctor request received for ID:', req.params.id); // Debug
+  console.log('Get doctor request received for ID:', req.params.id);
   try {
-    const doctor = await Doctor.findById(req.params.id);
+    const doctor = await Doctor.findById(req.params.id).lean();
     if (!doctor) {
-      console.log('Doctor not found for ID:', req.params.id); // Debug
+      console.log('Doctor not found for ID:', req.params.id);
       return res.status(404).json({ message: 'Doctor not found' });
     }
-    console.log('Doctor retrieved:', doctor._id); // Debug
-    res.json(doctor);
+    console.log('Doctor retrieved successfully:', doctor);
+    res.status(200).json(doctor);
   } catch (error) {
-    console.error('Get doctor error:', error.message, error.stack); // Debug
+    console.error('Get doctor error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: 'Failed to get doctor', error: error.message });
   }
 };
 
+// Update doctor
 const updateDoctor = async (req, res) => {
-  console.log('Update doctor request received:', req.params.id, req.body, 'File:', req.file); // Debug
+  console.log('Update doctor request received:', {
+    id: req.params.id,
+    body: req.body,
+    file: req.file,
+    user: req.user._id,
+  });
   try {
     const doctor = await Doctor.findById(req.params.id);
     if (!doctor) {
-      console.log('Doctor not found for update:', req.params.id); // Debug
+      console.log('Doctor not found for update:', req.params.id);
       return res.status(404).json({ message: 'Doctor not found' });
     }
     if (doctor.user.toString() !== req.user._id.toString()) {
-      console.log('Unauthorized update attempt by user:', req.user._id); // Debug
+      console.log('Unauthorized update attempt by user:', req.user._id);
       return res.status(403).json({ message: 'Not authorized to update this doctor' });
     }
     const updatedData = { ...req.body };
-    
-    // Handle file upload
     if (req.file) {
-      // If using Cloudinary, the file path will be in req.file.path
-      updatedData.picture = req.file.path; // Cloudinary URL
-      console.log('Image updated on Cloudinary:', req.file.path); // Debug
+      updatedData.picture = req.file.path;
+      console.log('Image updated on Cloudinary:', req.file.path);
     } else if (req.body.existingPictureUrl) {
-      // If no new picture is uploaded but there's an existing one, keep it
       updatedData.picture = req.body.existingPictureUrl;
-      console.log('Keeping existing picture URL:', req.body.existingPictureUrl); // Debug
+      console.log('Keeping existing picture URL:', req.body.existingPictureUrl);
     }
-    
-    // Handle schedule data
     if (updatedData.schedule) {
       updatedData.schedule = typeof updatedData.schedule === 'string'
         ? JSON.parse(updatedData.schedule)
         : updatedData.schedule;
+      console.log('Parsed schedule for update:', updatedData.schedule);
     }
-    
-    // Remove the existingPictureUrl field as it's not part of the model
     delete updatedData.existingPictureUrl;
-    
-    // Update the doctor document
     Object.assign(doctor, updatedData);
     await doctor.save();
-    
-    console.log('Doctor updated:', doctor); // Debug full doctor object
-    res.json(doctor);
+    console.log('Doctor updated successfully:', doctor);
+    res.status(200).json(doctor);
   } catch (error) {
-    console.error('Update doctor error:', error.message, error.stack); // Debug
+    console.error('Update doctor error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: 'Failed to update doctor', error: error.message });
   }
 };
 
+// Delete doctor
 const deleteDoctor = async (req, res) => {
-  console.log('Delete doctor request received:', req.params.id); // Debug
+  console.log('Delete doctor request received:', req.params.id);
   try {
     const doctor = await Doctor.findById(req.params.id);
     if (!doctor) {
-      console.log('Doctor not found for deletion:', req.params.id); // Debug
+      console.log('Doctor not found for deletion:', req.params.id);
       return res.status(404).json({ message: 'Doctor not found' });
     }
     if (doctor.user.toString() !== req.user._id.toString()) {
-      console.log('Unauthorized deletion attempt by user:', req.user._id); // Debug
+      console.log('Unauthorized deletion attempt by user:', req.user._id);
       return res.status(403).json({ message: 'Not authorized to delete this doctor' });
     }
     await Doctor.deleteOne({ _id: req.params.id });
-    console.log('Doctor deleted:', req.params.id); // Debug
-    res.json({ message: 'Doctor deleted' });
+    console.log('Doctor deleted successfully:', req.params.id);
+    res.status(200).json({ message: 'Doctor deleted' });
   } catch (error) {
-    console.error('Delete doctor error:', error.message, error.stack); // Debug
+    console.error('Delete doctor error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: 'Failed to delete doctor', error: error.message });
   }
 };
 
+// Get doctors by user
 const getDoctorsByUser = async (req, res) => {
-  console.log('Get doctors by user request received', req.params, req.query); // Debug
+  console.log('Get doctors by user request received:', {
+    params: req.params,
+    query: req.query,
+    user: req.user?._id,
+  });
   try {
     let query = {};
-    
-    // Check for userId in route params (for /by-user/:userId)
     if (req.params.userId) {
       query.user = req.params.userId;
-      console.log('Using userId from params:', req.params.userId); // Debug
-    }
-    // Check for user query param (for /?user=xyz)
-    else if (req.query.user) {
+      console.log('Using userId from params:', req.params.userId);
+    } else if (req.query.user) {
       query.user = req.query.user;
-      console.log('Using userId from query:', req.query.user); // Debug
-    }
-    // Use authenticated user (for protected routes)
-    else if (req.user) {
+      console.log('Using userId from query:', req.query.user);
+    } else if (req.user) {
       query.user = req.user._id;
-      console.log('Using authenticated userId:', req.user._id); // Debug
+      console.log('Using authenticated userId:', req.user._id);
     }
-    
-    console.log('Final query:', query); // Debug
-    const doctors = await Doctor.find(query);
-    
+    const doctors = await Doctor.find(query).lean();
     if (doctors.length === 0) {
-      console.log('No doctors found for query:', query); // Debug
-      
-      // If we're looking for a specific user's doctor profile, return the first one
+      console.log('No doctors found for query:', query);
       if (req.params.userId || req.query.user) {
         return res.status(404).json({ message: 'Doctor profile not found' });
       }
     }
-    
-    // If we're looking for a specific user's doctor profile via /by-user/:userId, return the first one
     if (req.params.userId && doctors.length > 0) {
-      console.log('Returning single doctor for user:', req.params.userId); // Debug
-      return res.json(doctors[0]);
+      console.log('Returning single doctor for user:', req.params.userId, doctors[0]);
+      return res.status(200).json(doctors[0]);
     }
-    
-    console.log('Doctors retrieved:', doctors.length); // Debug
-    res.json(doctors);
+    console.log('Doctors retrieved successfully:', doctors);
+    res.status(200).json(doctors);
   } catch (error) {
-    console.error('Get doctors by user error:', error.message, error.stack); // Debug
+    console.error('Get doctors by user error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: 'Failed to get doctors', error: error.message });
   }
 };
 
-// New function to get all doctors (public access)
+// Get all doctors (public access with caching)
 const getAllDoctors = async (req, res) => {
-  console.log('Get all doctors request received'); // Debug
+  console.log('Get all doctors request received');
+  const cacheKey = 'doctors:all';
+
   try {
-    const doctors = await Doctor.find({}).populate('user', 'name email');
-    console.log('All doctors retrieved:', doctors.length); // Debug
-    res.json(doctors);
+    // Check Redis cache
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      console.log('Serving doctors from Redis cache:', parsedData);
+      return res.status(200).json(parsedData);
+    }
+
+    // Fetch from MongoDB
+    const doctors = await Doctor.find({}).lean();
+    console.log('Fetched doctors from MongoDB:', doctors);
+
+    // Cache in Redis with 1-hour TTL
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(doctors));
+    console.log('Cached doctors in Redis:', doctors);
+
+    res.status(200).json(doctors);
   } catch (error) {
-    console.error('Get all doctors error:', error.message, error.stack); // Debug
+    console.error('Get all doctors error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: 'Failed to get doctors', error: error.message });
   }
 };
@@ -183,5 +205,5 @@ module.exports = {
   updateDoctor,
   deleteDoctor,
   getDoctorsByUser,
-  getAllDoctors, // Export new function
+  getAllDoctors,
 };

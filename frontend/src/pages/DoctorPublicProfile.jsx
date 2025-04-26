@@ -26,11 +26,18 @@ function DoctorPublicProfile() {
 
   useEffect(() => {
     const fetchDoctor = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/${id}`);
+        console.log('Fetch doctor response:', response.data); // Log response
+        if (!response.data || Object.keys(response.data).length === 0) {
+          throw new Error('No doctor data returned');
+        }
         setDoctor(response.data);
+        setError('');
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load doctor details');
+        console.error('Fetch doctor error:', err.response?.data || err.message); // Log error
+        setError(err.response?.data?.message || 'Failed to load doctor profile. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -126,6 +133,7 @@ function DoctorPublicProfile() {
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
+          console.log('Book appointment response:', response.data); // Log response
           setToast({
             isOpen: true,
             title: 'Success',
@@ -143,16 +151,15 @@ function DoctorPublicProfile() {
           setSelectedPlace('');
           setSelectedTime('');
         } catch (err) {
-          console.error('Book appointment error:', err.response?.data || err.message);
-          if (err.response?.status === 400 && err.response?.data?.message?.includes('fully booked')) {
-            setError('This slot is fully booked. Please select another time.');
-          } else {
-            setError(err.response?.data?.message || 'Failed to book appointment');
-          }
+          console.error('Book appointment error:', err.response?.data || err.message); // Log error
+          const errorMessage = err.response?.status === 400 && err.response?.data?.message?.includes('fully booked')
+            ? 'This slot is fully booked. Please select another time.'
+            : err.response?.data?.message || 'Failed to book appointment';
+          setError(errorMessage);
           setToast({
             isOpen: true,
             title: 'Error',
-            message: err.response?.data?.message || 'Failed to book appointment',
+            message: errorMessage,
             type: 'error',
             showCancel: true,
           });
@@ -164,6 +171,20 @@ function DoctorPublicProfile() {
   };
 
   if (loading) return <MedicalLoader text="Loading Doctor Profile..." />;
+  if (error) return (
+    <div className="container mx-auto py-8 px-4 text-center">
+      <div className="bg-red-100 text-red-700 p-4 rounded-lg">
+        <h2 className="text-xl font-semibold mb-2">Error</h2>
+        <p>{error}</p>
+        <button
+          onClick={() => navigate('/all-doctors')}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Back to Doctors
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -183,17 +204,18 @@ function DoctorPublicProfile() {
           <div className="flex flex-col items-center">
             <div className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden mb-4">
               <img
-                src={doctor?.picture || 'https://via.placeholder.com/96'}
-                alt={doctor?.name}
+                src={doctor.picture || 'https://via.placeholder.com/96'}
+                alt={doctor.name}
                 className="w-full h-full object-cover"
+                loading="lazy" // Lazy-load image
               />
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 text-center">{doctor?.name}</h2>
+            <h2 className="text-xl font-semibold text-gray-800 text-center">{doctor.name}</h2>
             <p className="text-gray-600 text-center">
-              {doctor?.experienceYears} years, {doctor?.specialist}
+              {doctor.experienceYears} years, {doctor.specialist}
             </p>
             <div className="mt-6 w-full">
-              <QRCodeGenerator url={window.location.href} doctorName={doctor?.name || 'Doctor'} />
+              <QRCodeGenerator url={window.location.href} doctorName={doctor.name || 'Doctor'} />
             </div>
           </div>
         </div>
@@ -205,11 +227,11 @@ function DoctorPublicProfile() {
           {/* About Section */}
           <section className="mb-8">
             <h3 className="text-lg font-semibold text-gray-700 mb-2">About</h3>
-            <p className="text-gray-600">{doctor?.about || 'No description available.'}</p>
+            <p className="text-gray-600">{doctor.about || 'No description available.'}</p>
             <div className="mt-4 space-y-2">
-              <p className="text-gray-600"><strong>Education:</strong> {doctor?.education}</p>
-              <p className="text-gray-600"><strong>Languages:</strong> {doctor?.language}</p>
-              <p className="text-gray-600"><strong>Consultation Fees:</strong> ₹{doctor?.fees}</p>
+              <p className="text-gray-600"><strong>Education:</strong> {doctor.education || 'N/A'}</p>
+              <p className="text-gray-600"><strong>Languages:</strong> {doctor.language || 'N/A'}</p>
+              <p className="text-gray-600"><strong>Consultation Fees:</strong> ₹{doctor.fees}</p>
             </div>
           </section>
 
@@ -226,7 +248,7 @@ function DoctorPublicProfile() {
                   </tr>
                 </thead>
                 <tbody>
-                  {doctor?.schedule?.flatMap((sched, dayIndex) =>
+                  {doctor.schedule?.flatMap((sched, dayIndex) =>
                     sched.places.map((place, placeIndex) => (
                       <tr key={`${dayIndex}-${placeIndex}`} className="border-b">
                         <td className="py-2 px-4">{sched.day}</td>
@@ -255,7 +277,7 @@ function DoctorPublicProfile() {
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a day</option>
-                  {doctor?.schedule?.map((sched, index) => (
+                  {doctor.schedule?.map((sched, index) => (
                     <option key={index} value={sched.day}>{sched.day}</option>
                   ))}
                 </select>
@@ -269,7 +291,7 @@ function DoctorPublicProfile() {
                   disabled={!selectedDay}
                 >
                   <option value="">Select a place</option>
-                  {doctor?.schedule
+                  {doctor.schedule
                     ?.find((sched) => sched.day === selectedDay)
                     ?.places.map((place, index) => (
                       <option key={index} value={place.place}>{place.place}</option>
@@ -285,7 +307,7 @@ function DoctorPublicProfile() {
                   disabled={!selectedPlace}
                 >
                   <option value="">Select a time interval</option>
-                  {doctor?.schedule
+                  {doctor.schedule
                     ?.find((sched) => sched.day === selectedDay)
                     ?.places.filter((place) => place.place === selectedPlace)
                     .map((place, index) => {
