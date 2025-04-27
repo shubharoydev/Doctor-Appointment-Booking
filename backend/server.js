@@ -10,8 +10,13 @@ const cors = require('cors');
 
 const app = express();
 
+require('dotenv').config();
+
 const corsOptions = {
-  origin: 'https://doctor-appointment-booking-frontend.onrender.com', // Adjust if your frontend URL differs
+  origin: [
+    'http://localhost:5173',
+    'https://doctor-appointment-booking-frontend.onrender.com/',
+   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
