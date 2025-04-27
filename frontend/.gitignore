@@ -23,9 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Local env files
 .env
-.env.local
 
 package-lock.json
 

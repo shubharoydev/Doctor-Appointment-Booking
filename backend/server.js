@@ -16,6 +16,7 @@ const corsOptions = {
   origin: [
     'http://localhost:5173',
     'https://doctor-appointment-booking-frontend.onrender.com/',
+    'https://doctor-appointment-booking-bice.vercel.app/contact'
    ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
