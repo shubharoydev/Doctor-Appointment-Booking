@@ -35,7 +35,7 @@ const doctorSignup = async (req, res) => {
     // Generate a random 6-digit verification code
     const plainVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     console.log(`Generated verification code: ${plainVerificationCode}`); // Debug
-    
+
     // Hash the verification code
     const hashedVerificationCode = await bcrypt.hash(plainVerificationCode, 10);
     
@@ -92,7 +92,7 @@ const userSignup = async (req, res) => {
     // Generate a random 6-digit verification code
     const plainVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     console.log(`Generated verification code: ${plainVerificationCode}`); // Debug
-    
+
     // Hash the verification code
     const hashedVerificationCode = await bcrypt.hash(plainVerificationCode, 10);
     

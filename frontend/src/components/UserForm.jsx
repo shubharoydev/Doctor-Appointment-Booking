@@ -331,10 +331,10 @@ function UserForm() {
               />
               <p className="text-xs text-gray-500 mt-1">Required for appointment booking</p>
             </div>
-            <div>
+          <div>
               <label className="block text-sm font-medium text-gray-700">Blood Group</label>
-              <input
-                type="text"
+            <input
+              type="text"
                 name="bloodGroup"
                 value={formData.bloodGroup}
                 onChange={handleInputChange}
@@ -392,7 +392,7 @@ function UserForm() {
             <div>
               <label className="block text-sm font-medium text-gray-700">Address</label>
               <textarea
-                name="address"
+              name="address"
                 value={formData.address}
                 onChange={handleInputChange}
                 className="mt-1 w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
@@ -407,31 +407,31 @@ function UserForm() {
                   type="text"
                   name="city"
                   value={formData.city || ''}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
+              onChange={handleInputChange}
+              className="mt-1 w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
                 <label className="block text-sm font-medium text-gray-700">State</label>
-                <input
-                  type="text"
+            <input
+              type="text"
                   name="state"
                   value={formData.state}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              onChange={handleInputChange}
+              className="mt-1 w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                   required
-                />
-              </div>
-              <div>
+            />
+          </div>
+          <div>
                 <label className="block text-sm font-medium text-gray-700">Pincode</label>
-                <input
+            <input
                   type="text"
                   name="pincode"
                   value={formData.pincode}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              onChange={handleInputChange}
+              className="mt-1 w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                   required
-                />
+            />
               </div>
             </div>
           </div>

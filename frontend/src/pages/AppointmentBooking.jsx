@@ -54,7 +54,7 @@ function AppointmentBooking() {
         confirmText: 'Leave',
         showCancel: true
       });
-      e.preventDefault();
+    e.preventDefault();
       e.returnValue = '';
     };
 
@@ -107,13 +107,13 @@ function AppointmentBooking() {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">Book Appointment with Dr. {doctor.name}</h2>
           {/* Add your booking form here */}
-          <button
+            <button
             onClick={handleBooking}
             className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-          >
+            >
             Book Appointment
-          </button>
-        </div>
+            </button>
+      </div>
       )}
     </div>
   );
