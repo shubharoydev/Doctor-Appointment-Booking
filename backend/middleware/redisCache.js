@@ -1,58 +1,39 @@
 const redisClientPromise = require('../config/redis');
 
-const CACHE_TTL = 3600; // 1 hour in seconds
-
-const redisCache = (key, ttl = CACHE_TTL) => {
-  return async (req, res, next) => {
-    const redis = await redisClientPromise; // Await the Redis client
-    try {
-      // Generate cache key based on request parameters
-      const cacheKey = typeof key === 'function' ? key(req) : key;
-      
-      // Try to get from Redis first
-      const cachedData = await redis.get(cacheKey);
-      if (cachedData) {
-        console.log(`Cache hit for key: ${cacheKey}`);
-        return res.json(JSON.parse(cachedData));
-      }
-      console.log(`Cache miss for key: ${cacheKey}`);
-
-      // If not in Redis, proceed with the request
-      // Store the original res.json method
-      const originalJson = res.json;
-
-      // Override res.json method
-      res.json = async function(data) {
-        // Cache the response in Redis
-        await redis.setex(cacheKey, ttl, JSON.stringify(data))
-          .catch(err => console.error('Redis caching error:', err));
-
-        // Call the original res.json method
-        return originalJson.call(this, data);
-      };
-
-      next();
-    } catch (error) {
-      console.error('Redis cache middleware error:', error);
-      next();
-    }
-  };
-};
-
-// Helper function to clear cache
-const clearCache = async (pattern) => {
-  const redis = await redisClientPromise; // Await the Redis client
+const redisCache = (generateCacheKey) => async (req, res, next) => {
+  const redisClient = await redisClientPromise;
+  const cacheKey = generateCacheKey(req);
   try {
-    const keys = await redis.keys(pattern);
-    if (keys.length > 0) {
-      await redis.del(keys);
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log(`Cache hit for key: ${cachedData}:`);
+      return res.status(200).json(JSON.parse(cachedData));
     }
+    const originalJson = res.json.bind(res);
+    res.json = async (data) => {
+      try {
+        await redisClient.set(cacheKey, JSON.stringify(data), { EX: 300 }, // Set expiration to 5 minutes
+        );
+      } catch (error) {
+        console.error(`Error setting key ${cacheKey}:`, error);
+      }
+      return originalJson(data);
+    };
+    next();
   } catch (error) {
-    console.error('Error clearing cache:', error);
+    console.error('Redis cache error:', error);
+    next();
   }
 };
 
-module.exports = {
-  redisCache,
-  clearCache
+const clearCache = async (cacheKey) => {
+  const redisClient = await redisClientPromise;
+  try {
+    const result = await redisClient.del(cacheKey);
+    console.log(`Cleared cache for ${cacheKey}: ${result}`);
+  } catch (error) {
+    console.error(`Error clearing cache for ${cacheKey}:`, error);
+  }
 };
+
+module.exports = { redisCache, clearCache };

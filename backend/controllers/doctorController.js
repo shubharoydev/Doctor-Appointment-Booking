@@ -191,6 +191,8 @@ const getDoctorsByUser = async (req, res) => {
 };
 
 // Get all doctors (using GraphQL)
+
+// Get all doctors (using GraphQL)
 const getAllDoctors = async (req, res) => {
   try {
     const redis = await redisClientPromise; // Await the Redis client
@@ -220,9 +222,14 @@ const getAllDoctors = async (req, res) => {
     // Cache each doctor's partial data under all_doctors:<doctorId>:partial
     for (const doctor of doctors) {
       const partialKey = `all_doctors:${doctor._id}:partial`;
-      await redis.setex(partialKey, CACHE_TTL, JSON.stringify(doctor)).catch(err => {
-        console.error(`Redis cache set error for ${partialKey}:`, err);
-      });
+      try {
+        await redis.set(partialKey, JSON.stringify(doctor), {
+          EX: CACHE_TTL, // Set expiration time (e.g., 3600 seconds)
+        });
+        console.log(`Cached partial data for doctor ${doctor._id} with key ${partialKey}`);
+      } catch (err) {
+        console.error(`Redis cache set error for ${partialKey}:`, err.message);
+      }
     }
 
     console.log(`Fetched ${doctors.length} doctors via GraphQL`);
@@ -235,7 +242,6 @@ const getAllDoctors = async (req, res) => {
     res.status(500).json({ message: 'Failed to get doctors', error: error.message });
   }
 };
-
 // Get doctor appointments
 const getDoctorAppointments = async (req, res) => {
   try {

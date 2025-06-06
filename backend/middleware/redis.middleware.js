@@ -34,44 +34,23 @@ const redisCacheMiddleware = (cacheKeyPrefix) => async (req, res, next) => {
       // Continue execution even if cache retrieval fails
     }
     
-    // Special handling for /by-user/:userId endpoint to ensure full data
-    if (isByUserEndpoint) {
-      // Override res.json to cache successful responses with full data
-      const originalJson = res.json.bind(res);
-      res.json = async (data) => {
-        if (res.statusCode === 200 || res.statusCode === 201) {
-          try {
-            // Verify we have full data before caching
-            if (data && typeof data === 'object' && Object.keys(data).length > 5) {
-              console.log(`Caching full doctor data with ${Object.keys(data).length} fields`);
-              await redisClient.setex(cacheKey, 3600, JSON.stringify(data));
-              console.log(`Cached full doctor data for key: ${cacheKey}`);
-            } else {
-              console.log('Not caching limited data for full doctor endpoint');
-            }
-          } catch (cacheError) {
-            console.log(`Cache storage error for key ${cacheKey}:`, cacheError.message);
-            // Continue execution even if caching fails
-          }
+    // Override res.json to cache successful responses
+    const originalJson = res.json.bind(res);
+    res.json = async (data) => {
+      if (res.statusCode === 200 || res.statusCode === 201) {
+        try {
+          // Use the new set method with EX option instead of setex
+          await redisClient.set(cacheKey, JSON.stringify(data), {
+            EX: 3600, // Set expiration to 1 hour (3600 seconds)
+          });
+          console.log(`Cached data for key: ${cacheKey}`);
+        } catch (cacheError) {
+          console.log(`Cache storage error for key ${cacheKey}:`, cacheError.message);
+          // Continue execution even if caching fails
         }
-        return originalJson(data);
-      };
-    } else {
-      // Standard caching for other endpoints
-      const originalJson = res.json.bind(res);
-      res.json = async (data) => {
-        if (res.statusCode === 200 || res.statusCode === 201) {
-          try {
-            await redisClient.setex(cacheKey, 3600, JSON.stringify(data));
-            console.log(`Cached data for key: ${cacheKey}`);
-          } catch (cacheError) {
-            console.log(`Cache storage error for key ${cacheKey}:`, cacheError.message);
-            // Continue execution even if caching fails
-          }
-        }
-        return originalJson(data);
-      };
-    }
+      }
+      return originalJson(data);
+    };
 
     next();
   } catch (error) {

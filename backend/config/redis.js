@@ -1,4 +1,4 @@
-const redis = require('redis');
+const { createClient } = require('redis');
 
 // Create a mock Redis client that works when Redis is not available
 class MockRedisClient {
@@ -45,6 +45,14 @@ class MockRedisClient {
   async ping() {
     return 'PONG';
   }
+
+  async connect() {
+    return true;
+  }
+
+  async quit() {
+    return 'OK';
+  }
 }
 
 // Initialize Redis client
@@ -52,43 +60,54 @@ const initializeRedisClient = async () => {
   let redisClient;
 
   try {
-    redisClient = redis.createClient({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD,
-      connect_timeout: 5000, // 5 seconds
-      retry_strategy: (options) => {
-        if (options.attempt > 3) {
-          return null; // Stop retrying after 3 attempts
-        }
-        const delay = Math.min(options.attempt * 50, 2000);
-        return delay;
+    // Use the provided REDIS_URL
+    const redisUrl = process.env.REDIS_URL;
+    if (!redisUrl) {
+      throw new Error('REDIS_URL environment variable is not set');
+    }
+    console.log('Attempting to connect to Redis with URL:', redisUrl.replace(/:[^@]+@/, ':****@')); // Mask password in logs
+
+    redisClient = createClient({
+      url: redisUrl,
+      socket: {
+        connectTimeout: 5000,
+        reconnectStrategy: (retries) => {
+          if (retries > 3) {
+            console.log('Max retries reached, switching to mock client');
+            return new Error('Max retries reached');
+          }
+          const delay = Math.min(retries * 50, 2000);
+          return delay;
+        },
       },
     });
 
     redisClient.on('error', (err) => {
-      console.error('Redis connection error:', err);
+      console.error('Redis connection error:', err.message);
     });
 
     redisClient.on('connect', () => {
       console.log('✅ Connected to Redis');
     });
 
-    // Promisify Redis methods
-    const util = require('util');
-    redisClient.get = util.promisify(redisClient.get);
-    redisClient.setex = util.promisify(redisClient.setex);
-    redisClient.del = util.promisify(redisClient.del);
-    redisClient.keys = util.promisify(redisClient.keys);
-    redisClient.ping = util.promisify(redisClient.ping);
+    redisClient.on('end', () => {
+      console.log('Redis connection closed');
+    });
+
+    // Connect to Redis
+    await redisClient.connect();
+    console.log('Redis connection established, testing with ping');
 
     // Test connection with ping
-    await redisClient.ping();
-    console.log('Redis connection test successful');
+    const pingResult = await redisClient.ping();
+    console.log('Redis ping result:', pingResult);
+
     return redisClient;
   } catch (error) {
-    console.log('Failed to initialize Redis client:', error.message);
-    return new MockRedisClient();
+    console.error('Failed to initialize Redis client:', error.message);
+    redisClient = new MockRedisClient();
+    await redisClient.connect(); // Mock connect for compatibility
+    return redisClient;
   }
 };
 

@@ -31,7 +31,7 @@ const apiKeyMiddleware = (req, res, next) => {
 
 // Clear Redis cache for doctor-related keys
 const clearDoctorListCache = async () => {
-  const redisClient = await redisClientPromise; // Await the Redis client
+  const redisClient = await redisClientPromise;
   try {
     const keys = await redisClient.keys('doctors:*');
     const allDoctorKeys = await redisClient.keys('all_doctors:*');
@@ -44,10 +44,30 @@ const clearDoctorListCache = async () => {
   }
 };
 
+// New endpoint to clear only private profile cache
+router.delete('/clear-private-cache', protect, restrictTo('doctor'), async (req, res) => {
+  const redisClient = await redisClientPromise;
+  try {
+    // Delete only private profile keys (doctors:user:*)
+    const privateKeys = await redisClient.keys('doctors:user:*');
+    if (privateKeys.length > 0) {
+      await redisClient.del(privateKeys);
+      console.log(`Cleared private profile cache keys: ${privateKeys.join(', ')}`);
+    } else {
+      console.log('No private profile cache keys found to clear');
+    }
+    res.status(200).json({ message: 'Private profile cache cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing private profile cache:', error);
+    res.status(500).json({ message: 'Failed to clear private profile cache', error: error.message });
+  }
+});
+
 // Routes
 router.get('/all/doctors', redisCacheMiddleware('doctors'), getAllDoctors);
-router.get('/by-user/:userId', protect, restrictTo('doctor'), redisCacheMiddleware('doctors:user'), getDoctorsByUser);
-router.get('/', protect, restrictTo('doctor'), redisCacheMiddleware('doctors:user'), getDoctorsByUser);
+// Removed caching for /by-user/:userId to prevent private profile data from being cached
+router.get('/by-user/:userId', protect, restrictTo('doctor'), getDoctorsByUser);
+router.get('/', protect, restrictTo('doctor'), getDoctorsByUser);
 router.get('/id/:id', redisCacheMiddleware('doctors:id'), getDoctor);
 router.post('/', protect, restrictTo('doctor'), upload.single('picture'), async (req, res, next) => {
   await clearDoctorListCache();
@@ -62,15 +82,11 @@ router.delete('/:id', protect, restrictTo('doctor'), async (req, res, next) => {
   deleteDoctor(req, res, next);
 });
 
-// Get doctor by ID (cached) - Make this route public by removing protect and authenticateToken
+// Get doctor by ID (cached) - Public route
 router.get('/:id', redisCache(req => `doctor:${req.params.id}`), getDoctor);
 
-// Get doctor appointments (cached)
-router.get('/:id/appointments', 
-  authenticateToken,
-  redisCache(req => `appointments:${req.params.id}`),
-  getDoctorAppointments
-);
+// Get doctor appointments (no caching)
+router.get('/:id/appointments', authenticateToken, getDoctorAppointments);
 
 // Update doctor profile (clears cache)
 router.put('/:id', 
