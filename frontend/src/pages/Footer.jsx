@@ -54,25 +54,11 @@ const Footer = () => {
           <div className="mt-8 text-center">
             <h3 className="font-semibold text-lg">Connect with Us</h3>
             <div className="flex justify-center space-x-4 mt-2">
-              <a href="" className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"> Email</a>
-              <a href="" className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"> Facebook</a>
-              <a href="www.instagram.com" className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"> Instagram</a>
+             <a href="mailto:medilink.79@gmail.com" className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">Email</a>
+              <a href="https://www.facebook.com/share/QKzvPyFThtrYkxiX/" className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"> Facebook</a>
+              <a href="https://www.instagram.com/medilink_service" className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"> Instagram</a>
             </div>
           </div>
-  
-          {/* Floating Buttons
-          <div className="fixed bottom-5 right-5 space-y-3">
-            <button className="flex items-center bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-600">
-              📞 Emergency
-            </button>
-            <button className="flex items-center bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-600">
-              📅 Book Appointment
-            </button>
-            <button className="flex items-center bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-600">
-              🏥 Health Checkup
-            </button>
-          </div> */}
-  
           {/* Copyright */}
           <div className="mt-6 text-center text-gray-400">
             © 2024 MediLink. All rights reserved.

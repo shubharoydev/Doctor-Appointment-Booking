@@ -28,16 +28,28 @@ function DoctorPublicProfile() {
     const fetchDoctor = async () => {
       setLoading(true);
       try {
+        // Use the correct endpoint for public doctor profile
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/${id}`);
-        console.log('Fetch doctor response:', response.data); // Log response
+        console.log('Fetch doctor response:', response.data);
+        
         if (!response.data || Object.keys(response.data).length === 0) {
           throw new Error('No doctor data returned');
         }
+        
         setDoctor(response.data);
         setError('');
       } catch (err) {
-        console.error('Fetch doctor error:', err.response?.data || err.message); // Log error
-        setError(err.response?.data?.message || 'Failed to load doctor profile. Please try again later.');
+        console.error('Fetch doctor error:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          config: {
+            url: err.config?.url,
+            method: err.config?.method,
+            headers: err.config?.headers
+          }
+        });
+        setError('Failed to load doctor profile. Please check the console for details.');
       } finally {
         setLoading(false);
       }

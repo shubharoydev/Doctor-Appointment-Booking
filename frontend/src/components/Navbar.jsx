@@ -93,7 +93,23 @@ function Navbar() {
     <nav className="bg-white shadow-md p-4 text-black">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold">Doctor App</Link>
+       <Link to="/" className="text-xl font-bold flex items-center space-x-2">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 800 200"
+    className="h-12 w-auto"
+  >
+    <g transform="translate(50,30)">
+      <path d="M92.3,0C104.8,0,115,10.2,115,22.7V57.3H149.7C162.2,57.3,172.4,67.5,172.4,80S162.2,102.7,149.7,102.7H115V137.3C115,149.8,104.8,160,92.3,160S69.7,149.8,69.7,137.3V102.7H35C22.5,102.7,12.3,92.5,12.3,80S22.5,57.3,35,57.3H69.7V22.7C69.7,10.2,79.9,0,92.3,0Z" fill="#1CC5AC"/>
+      <path d="M130,50C150,55,160,85,150,110S110,140,90,130S80,100,95,85S120,45,130,50Z" fill="none" stroke="#0C2F4E" strokeWidth="10" strokeLinecap="round"/>
+      <circle cx="80" cy="150" r="10" fill="#0C2F4E"/>
+      <path d="M90,130C70,140,40,130,30,100" fill="none" stroke="#0C2F4E" strokeWidth="10" strokeLinecap="round"/>
+      <text x="200" y="90" fontFamily="Arial, Helvetica, sans-serif" fontSize="60" fontWeight="bold" fill="#0C2F4E">MEDIL</text>
+      <text x="420" y="90" fontFamily="Arial, Helvetica, sans-serif" fontSize="60" fontWeight="bold" fill="#1CC5AC">YNK</text>
+    </g>
+  </svg>
+</Link>
+
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4">
           <Link to="/" className="hover:underline">Home</Link>

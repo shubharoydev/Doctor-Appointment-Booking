@@ -12,8 +12,9 @@ const redisCache = (generateCacheKey) => async (req, res, next) => {
     const originalJson = res.json.bind(res);
     res.json = async (data) => {
       try {
-        await redisClient.set(cacheKey, JSON.stringify(data), { EX: 300 }, // Set expiration to 5 minutes
-        );
+        await redisClient.set(cacheKey, JSON.stringify(data), { 
+          EX: 3600 // Set expiration to 1 hour (3600 seconds)
+        });
       } catch (error) {
         console.error(`Error setting key ${cacheKey}:`, error);
       }

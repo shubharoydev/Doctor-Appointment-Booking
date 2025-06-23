@@ -18,6 +18,7 @@ import DoctorPublicProfile from './pages/DoctorPublicProfile';
 import Footer from './pages/Footer';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import NotAvailable from './pages/NotAvailable';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -110,6 +111,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/not-available" element={<NotAvailable />} />
         <Route
           path="/register"
           element={

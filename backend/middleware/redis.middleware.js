@@ -2,51 +2,39 @@ const redisClientPromise = require('../config/redis');
 
 // Redis caching middleware
 const redisCacheMiddleware = (cacheKeyPrefix) => async (req, res, next) => {
-  const redisClient = await redisClientPromise; // Await the Redis client
+  const redisClient = await redisClientPromise;
   try {
-    // Generate cache key
+    // Generate cache key based on the endpoint
     let cacheKey;
-    let isByUserEndpoint = false;
-    
-    if (req.params.id) {
-      cacheKey = `${cacheKeyPrefix}:id:${req.params.id}`; // For getDoctor
+    if (req.path === '/all/doctors' || req.path.endsWith('/all/doctors')) {
+      cacheKey = 'all_doctors_list';
+    } else if (req.params.id) {
+      cacheKey = `${cacheKeyPrefix}:${req.params.id}`;
     } else if (req.params.userId) {
-      cacheKey = `${cacheKeyPrefix}:user:full:${req.params.userId}`; // For getDoctorsByUser with full data
-      isByUserEndpoint = true;
-    } else if (req.query.user) {
-      cacheKey = `${cacheKeyPrefix}:user:limited:${req.query.user}`; // For getDoctorsByUser with query (limited data)
-    } else if (req.user) {
-      cacheKey = `${cacheKeyPrefix}:user:limited:${req.user._id}`; // For authenticated user (limited data)
+      cacheKey = `${cacheKeyPrefix}:user:${req.params.userId}`;
     } else {
-      cacheKey = cacheKeyPrefix; // For getAllDoctors
+      cacheKey = cacheKeyPrefix;
     }
 
-    try {
-      // Check Redis cache
-      const cachedData = await redisClient.get(cacheKey);
-      if (cachedData) {
-        console.log(`Cache hit for key: ${cacheKey}`);
-        return res.status(200).json(JSON.parse(cachedData));
-      }
-      console.log(`Cache miss for key: ${cacheKey}`);
-    } catch (cacheError) {
-      console.log(`Cache retrieval error for key ${cacheKey}:`, cacheError.message);
-      // Continue execution even if cache retrieval fails
+    // Check Redis cache
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log(`Cache hit for key: ${cacheKey}`);
+      return res.status(200).json(JSON.parse(cachedData));
     }
-    
+    console.log(`Cache miss for key: ${cacheKey}`);
+
     // Override res.json to cache successful responses
     const originalJson = res.json.bind(res);
     res.json = async (data) => {
       if (res.statusCode === 200 || res.statusCode === 201) {
         try {
-          // Use the new set method with EX option instead of setex
           await redisClient.set(cacheKey, JSON.stringify(data), {
-            EX: 3600, // Set expiration to 1 hour (3600 seconds)
+            EX: 3600, // 1 hour
           });
           console.log(`Cached data for key: ${cacheKey}`);
         } catch (cacheError) {
-          console.log(`Cache storage error for key ${cacheKey}:`, cacheError.message);
-          // Continue execution even if caching fails
+          console.error('Cache storage error:', cacheError.message);
         }
       }
       return originalJson(data);
@@ -54,11 +42,8 @@ const redisCacheMiddleware = (cacheKeyPrefix) => async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Redis cache middleware error:', {
-      message: error.message,
-      stack: error.stack,
-    });
-    next(); // Continue even if Redis fails
+    console.error('Redis cache middleware error:', error);
+    next(); // Continue to next middleware even if Redis fails
   }
 };
 

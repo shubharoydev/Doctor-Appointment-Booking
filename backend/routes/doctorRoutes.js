@@ -29,16 +29,29 @@ const apiKeyMiddleware = (req, res, next) => {
   next();
 };
 
-// Clear Redis cache for doctor-related keys
+// Clear Redis cache for all doctor-related keys
 const clearDoctorListCache = async () => {
   const redisClient = await redisClientPromise;
   try {
-    const keys = await redisClient.keys('doctors:*');
-    const allDoctorKeys = await redisClient.keys('all_doctors:*');
-    if (keys.length > 0) await redisClient.del(keys);
-    if (allDoctorKeys.length > 0) await redisClient.del(allDoctorKeys);
-    await redisClient.del('all_doctors');
-    console.log('Cleared doctor-related cache');
+    // Clear all doctor-related cache keys
+    const [doctorKeys, allDoctorKeys, doctorListKeys] = await Promise.all([
+      redisClient.keys('doctors:*'),      // Individual doctor caches
+      redisClient.keys('all_doctors*'),   // All doctors list cache
+      redisClient.keys('doctor:*')        // Alternative doctor cache keys
+    ]);
+    
+    const allKeys = [...new Set([...doctorKeys, ...allDoctorKeys, ...doctorListKeys])];
+    
+    if (allKeys.length > 0) {
+      await redisClient.del(allKeys);
+      console.log('Cleared doctor-related cache keys:', allKeys);
+      
+      // Also clear the specific keys we know about
+      await redisClient.del('all_doctors_list');
+      console.log('Cleared all_doctors_list cache');
+    } else {
+      console.log('No doctor-related cache keys found to clear');
+    }
   } catch (error) {
     console.error('Error clearing Redis cache:', error);
   }
@@ -63,27 +76,29 @@ router.delete('/clear-private-cache', protect, restrictTo('doctor'), async (req,
   }
 });
 
-// Routes
+// Public routes - no authentication required
 router.get('/all/doctors', redisCacheMiddleware('doctors'), getAllDoctors);
-// Removed caching for /by-user/:userId to prevent private profile data from being cached
-router.get('/by-user/:userId', protect, restrictTo('doctor'), getDoctorsByUser);
-router.get('/', protect, restrictTo('doctor'), getDoctorsByUser);
-router.get('/id/:id', redisCacheMiddleware('doctors:id'), getDoctor);
-router.post('/', protect, restrictTo('doctor'), upload.single('picture'), async (req, res, next) => {
+
+// Get doctor by ID (cached) - Public route
+router.get('/:id', redisCacheMiddleware('doctors'), getDoctor);
+
+// Protected routes - require authentication
+router.use(protect);
+
+// Doctor-specific routes
+router.get('/by-user/:userId', restrictTo('doctor'), getDoctorsByUser);
+router.post('/', restrictTo('doctor'), upload.single('picture'), async (req, res, next) => {
   await clearDoctorListCache();
   createDoctor(req, res, next);
 });
-router.put('/:id', protect, restrictTo('doctor'), upload.single('picture'), async (req, res, next) => {
+router.put('/:id', restrictTo('doctor'), upload.single('picture'), async (req, res, next) => {
   await clearDoctorListCache();
   updateDoctor(req, res, next);
 });
-router.delete('/:id', protect, restrictTo('doctor'), async (req, res, next) => {
+router.delete('/:id', restrictTo('doctor'), async (req, res, next) => {
   await clearDoctorListCache();
   deleteDoctor(req, res, next);
 });
-
-// Get doctor by ID (cached) - Public route
-router.get('/:id', redisCache(req => `doctor:${req.params.id}`), getDoctor);
 
 // Get doctor appointments (no caching)
 router.get('/:id/appointments', authenticateToken, getDoctorAppointments);
@@ -103,14 +118,54 @@ router.put('/:id',
 // Delete doctor (clears cache)
 router.delete('/:id', 
   authenticateToken, 
+  protect, 
+  restrictTo('doctor'), 
   async (req, res, next) => {
-    const redisClient = await redisClientPromise;
-    await redisClient.del(`doctor:${req.params.id}`);
-    await redisClient.del(`all_doctors:${req.params.id}:partial`);
-    await redisClient.del('all_doctors');
-    next();
+    try {
+      const redisClient = await redisClientPromise;
+    const keysToClear = [
+  `doctor:${req.params.id}`,
+  `doctors:id:${req.params.id}`, // ✅ Add this!
+  `all_doctors:${req.params.id}:partial`,
+  'all_doctors',
+  'doctors',
+];
+
+
+      // Add wildcard pattern for any variations (e.g., doctors:query)
+      const wildcardKeys = await redisClient.keys('doctors:*');
+      if (wildcardKeys.length > 0) {
+        keysToClear.push(...wildcardKeys);
+      }
+
+      // Log keys before deletion
+      console.log('Keys to clear:', keysToClear);
+
+      // Delete each key individually and log the result
+      for (const key of keysToClear) {
+        try {
+          const deleted = await redisClient.del(key);
+          console.log(`Deleted key ${key}: ${deleted} (1 = success, 0 = key not found)`);
+        } catch (err) {
+          console.error(`Error deleting key ${key}:`, err.message);
+        }
+      }
+
+      // Publish invalidation for each key
+      for (const key of keysToClear) {
+        await publishCacheInvalidation(redisClient, key);
+      }
+
+      console.log(`Completed cache clearing for doctor:${req.params.id}`);
+      next();
+    } catch (cacheError) {
+      console.error('Redis cache deletion error:', cacheError.message);
+      next();
+    }
   }, 
   deleteDoctor
 );
+
+
 
 module.exports = router;

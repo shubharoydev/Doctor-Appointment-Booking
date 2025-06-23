@@ -7,18 +7,18 @@ const userRoutes = require('./routes/userRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const { connectDB } = require('./config/db');
 const cors = require('cors');
-const startApolloServer = require('./graphql/app');
+const { subscribeToCacheUpdates } = require('./controllers/doctorController');
+subscribeToCacheUpdates(); // ensure this is called on app boot
 
 const app = express();
 
 require('dotenv').config();
 
+// Read allowed origins from environment variables and split by comma
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+
 const corsOptions = {
-  origin: [
-    'http://localhost:5173',
-    'https://doctor-appointment-booking-frontend.onrender.com',
-    'https://doctor-appointment-booking-bice.vercel.app'
-   ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -33,5 +33,5 @@ app.use('/api/appointments', appointmentRoutes);
 
 connectDB();
 
-const PORT = process.env.PORT || 5001; // Changed from 5000 to avoid port conflict
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
