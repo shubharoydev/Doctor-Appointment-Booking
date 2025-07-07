@@ -23,10 +23,10 @@ userSchema.pre('save', async function (next) {
   }
   
   try {
-    console.log('Hashing password for user:', this.email);
+    //console.log('Hashing password for user:', this.email);
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    console.log('Password hashed successfully');
+    //console.log('Password hashed successfully');
     next();
   } catch (error) {
     console.error('Error hashing password:', error);
@@ -37,7 +37,7 @@ userSchema.pre('save', async function (next) {
 // Method to compare password
 userSchema.methods.comparePassword = async function(candidatePassword) {
   try {
-    console.log('Comparing password using method');
+    //console.log('Comparing password using method');
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
     console.error('Error comparing password:', error);

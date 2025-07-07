@@ -117,7 +117,7 @@ function SidebarLayout({ children }) {
   const publicProfileUrl = isDoctor ? `${window.location.origin}/doctors/${profileId}` : '';
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-24">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="md:w-1/4 lg:w-1/5">
           <div className="bg-white p-4 rounded-lg shadow-md">

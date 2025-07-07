@@ -4,7 +4,7 @@ const { createClient } = require('redis');
 class MockRedisClient {
   constructor() {
     this.cache = {};
-    console.log('Using in-memory cache instead of Redis');
+   // console.log('Using in-memory cache instead of Redis');
   }
 
   async get(key) {
@@ -65,7 +65,7 @@ const initializeRedisClient = async () => {
     if (!redisUrl) {
       throw new Error('REDIS_URL environment variable is not set');
     }
-    console.log('Attempting to connect to Redis with URL:', redisUrl.replace(/:[^@]+@/, ':****@')); // Mask password in logs
+   // console.log('Attempting to connect to Redis with URL:', redisUrl.replace(/:[^@]+@/, ':****@')); // Mask password in logs
 
     redisClient = createClient({
       url: redisUrl,
@@ -73,7 +73,7 @@ const initializeRedisClient = async () => {
         connectTimeout: 5000,
         reconnectStrategy: (retries) => {
           if (retries > 3) {
-            console.log('Max retries reached, switching to mock client');
+           // console.log('Max retries reached, switching to mock client');
             return new Error('Max retries reached');
           }
           const delay = Math.min(retries * 50, 2000);

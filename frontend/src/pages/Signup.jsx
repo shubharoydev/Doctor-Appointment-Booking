@@ -29,7 +29,7 @@ function Signup({ role }) {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-25">
       {isLoading && <Loader text="Creating account..." />}
       <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">{`${role.charAt(0).toUpperCase() + role.slice(1)} Signup`}</h2>

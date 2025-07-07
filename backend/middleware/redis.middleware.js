@@ -19,10 +19,10 @@ const redisCacheMiddleware = (cacheKeyPrefix) => async (req, res, next) => {
     // Check Redis cache
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
-      console.log(`Cache hit for key: ${cacheKey}`);
+      //console.log(`Cache hit for key: ${cacheKey}`);
       return res.status(200).json(JSON.parse(cachedData));
     }
-    console.log(`Cache miss for key: ${cacheKey}`);
+    //console.log(`Cache miss for key: ${cacheKey}`);
 
     // Override res.json to cache successful responses
     const originalJson = res.json.bind(res);
@@ -32,7 +32,7 @@ const redisCacheMiddleware = (cacheKeyPrefix) => async (req, res, next) => {
           await redisClient.set(cacheKey, JSON.stringify(data), {
             EX: 3600, // 1 hour
           });
-          console.log(`Cached data for key: ${cacheKey}`);
+          //console.log(`Cached data for key: ${cacheKey}`);
         } catch (cacheError) {
           console.error('Cache storage error:', cacheError.message);
         }

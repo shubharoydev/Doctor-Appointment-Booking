@@ -22,31 +22,31 @@ function DoctorProfile() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const user = userResponse.data;
-      console.log('User data fetched in DoctorProfile:', user); // Debug
+      //console.log('User data fetched in DoctorProfile:', user); // Debug
 
       // Make sure we're using the correct ID property
       const userId = user._id || user.id;
-      console.log('User ID in DoctorProfile:', userId); // Debug
+      //console.log('User ID in DoctorProfile:', userId); // Debug
 
       // Ensure the user is a doctor
       const role = localStorage.getItem('userRole');
       if (role !== 'doctor') {
-        console.log('User is not a doctor:', role); // Debug
+        //console.log('User is not a doctor:', role); // Debug
         return navigate('/');
       }
 
       let doctorData = null;
       try {
-        console.log('Fetching doctor profile for user ID:', userId); // Debug
+        //console.log('Fetching doctor profile for user ID:', userId); // Debug
         const doctorResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/by-user/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('Doctor profile fetched in DoctorProfile:', doctorResponse.data); // Debug
+        //console.log('Doctor profile fetched in DoctorProfile:', doctorResponse.data); // Debug
         doctorData = doctorResponse.data;
         
         // If we have a doctor profile but the ID doesn't match the URL param, redirect to the correct profile
         if (doctorData._id !== id) {
-          console.log('Doctor ID mismatch, redirecting:', { doctorId: doctorData._id, paramId: id }); // Debug
+          //console.log('Doctor ID mismatch, redirecting:', { doctorId: doctorData._id, paramId: id }); // Debug
           return navigate(`/profile/${doctorData._id}`);
         }
       } catch (err) {
@@ -62,7 +62,7 @@ function DoctorProfile() {
       const appointmentsResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/appointments/doctor/${doctorData._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Appointments fetched in DoctorProfile:', appointmentsResponse.data); // Debug
+      //console.log('Appointments fetched in DoctorProfile:', appointmentsResponse.data); // Debug
       setProfile({ ...user, ...doctorData });
       setAppointments(appointmentsResponse.data);
     } catch (err) {
@@ -94,7 +94,7 @@ function DoctorProfile() {
   };
 
   const handleEdit = () => {
-    console.log('Edit button clicked, navigating to:', `/edit-doctor/${profile._id}`);
+    //console.log('Edit button clicked, navigating to:', `/edit-doctor/${profile._id}`);
     navigate(`/edit-doctor/${profile._id}`);
   };
 
@@ -109,7 +109,7 @@ function DoctorProfile() {
 
   return (
     <SidebarLayout profileId={id} userRole="doctor" onDelete={handleDelete}>
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-white p-6 rounded-lg shadow-md py-20">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">{profile?.name}'s Profile</h2>
         <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
           <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">

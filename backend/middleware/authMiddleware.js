@@ -8,16 +8,16 @@ const protect = async (req, res, next) => {
   }
 
   if (!token) {
-    console.log('No token provided'); // Debug
+    //console.log('No token provided'); // Debug
     return res.status(401).json({ message: 'Not authorized, no token' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-    console.log('Token decoded, user ID:', decoded.id, 'Role:', decoded.role); // Debug
+    //console.log('Token decoded, user ID:', decoded.id, 'Role:', decoded.role); // Debug
     req.user = await User.findById(decoded.id).select('-password');
     if (!req.user) {
-      console.log('User not found for token'); // Debug
+      //console.log('User not found for token'); // Debug
       return res.status(401).json({ message: 'User not found' });
     }
     next();
@@ -31,7 +31,7 @@ const protect = async (req, res, next) => {
 const restrictTo = (role) => {
   return (req, res, next) => {
     if (req.user.role !== role) {
-      console.log('Access denied: Role mismatch, expected:', role, 'got:', req.user.role); // Debug
+      //console.log('Access denied: Role mismatch, expected:', role, 'got:', req.user.role); // Debug
       return res.status(403).json({ message: 'Not authorized for this action' });
     }
     next();

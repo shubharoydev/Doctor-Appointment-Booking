@@ -149,11 +149,9 @@ function Home() {
     },
   ];
 
-  // Console log to confirm component rendering
-  console.log('Home component rendered successfully');
 
   return (
-  <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+  <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-20">
     {/* Hero Section */}
     <section
       className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white overflow-hidden"

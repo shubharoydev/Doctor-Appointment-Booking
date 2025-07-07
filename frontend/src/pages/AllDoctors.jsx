@@ -13,12 +13,11 @@ function DoctorList() {
       setLoading(true);
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/all/doctors`);
-        console.log('Fetch doctors response:', response.data);
+        //console.log('Fetch doctors response:', response.data);
         
         // Check if data is an array and has items
         if (Array.isArray(response.data) && response.data.length > 0) {
           // Dump the entire first doctor object to see all fields
-          console.log('First doctor complete object:', JSON.stringify(response.data[0], null, 2));
           
           // Process doctors to add a unique identifier for each doctor
           const processedDoctors = response.data.map((doctor, index) => {
@@ -28,24 +27,24 @@ function DoctorList() {
             // Try different possible ID fields
             if (doctor._id) {
               doctorId = doctor._id;
-              console.log(`Doctor ${index} has _id:`, doctorId);
+              //console.log(`Doctor ${index} has _id:`, doctorId);
             } else if (doctor.id) {
               doctorId = doctor.id;
-              console.log(`Doctor ${index} has id:`, doctorId);
+              //console.log(`Doctor ${index} has id:`, doctorId);
             } else if (doctor.user) {
               doctorId = doctor.user;
-              console.log(`Doctor ${index} has user id:`, doctorId);
+              //console.log(`Doctor ${index} has user id:`, doctorId);
             } else {
               // If no ID field is found, use the index as a last resort
               doctorId = `temp-${index}`;
-              console.log(`Doctor ${index} has no ID, using index:`, doctorId);
+              //console.log(`Doctor ${index} has no ID, using index:`, doctorId);
             }
             
             // Return doctor with guaranteed ID field
             return { ...doctor, doctorId };
           });
           
-          console.log('Processed doctors with IDs:', processedDoctors.map(d => ({ name: d.name, id: d.doctorId })));
+          //console.log('Processed doctors with IDs:', processedDoctors.map(d => ({ name: d.name, id: d.doctorId })));
           setDoctors(processedDoctors);
         } else {
           console.warn('No doctors found or invalid data format:', response.data);
@@ -83,8 +82,8 @@ function DoctorList() {
           className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           onClick={(e) => {
             // Log the doctor ID being used for navigation
-            console.log('Navigating to doctor profile with ID:', doctor.doctorId);
-            console.log('Full doctor object:', doctor);
+           //console.log('Navigating to doctor profile with ID:', doctor.doctorId);
+            //console.log('Full doctor object:', doctor);
             
             // If no valid ID or temporary ID, prevent navigation and show error
             if (!doctor.doctorId || doctor.doctorId.startsWith('temp-')) {
@@ -104,7 +103,7 @@ function DoctorList() {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-20">
       <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">All Doctors</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {doctors.length > 0 ? (

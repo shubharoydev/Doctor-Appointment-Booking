@@ -34,14 +34,14 @@ function App() {
     const checkProfile = async () => {
       const token = localStorage.getItem('accessToken');
       const role = localStorage.getItem('userRole');
-      console.log('Checking authentication:', { token, role, path: window.location.pathname }); // Log routing
+      //console.log('Checking authentication:', { token, role, path: window.location.pathname }); // Log routing
       if (token && role) {
         try {
           const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/user`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const user = response.data;
-          console.log('User data fetched:', user);
+         // console.log('User data fetched:', user);
 
           const userId = user._id || user.id;
           setUserId(userId);
@@ -50,11 +50,11 @@ function App() {
 
           if (role === 'doctor') {
             try {
-              console.log('Fetching doctor profile for user ID:', userId);
+             // console.log('Fetching doctor profile for user ID:', userId);
               const doctorResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/by-user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
-              console.log('Doctor profile exists:', doctorResponse.data);
+              // console.log('Doctor profile exists:', doctorResponse.data);
               setHasProfile(true);
             } catch (err) {
               console.log('No doctor profile found:', err.response?.data || err.message);
@@ -65,11 +65,11 @@ function App() {
             }
           } else if (role === 'user') {
             try {
-              console.log('Fetching user profile for user ID:', userId);
+              //console.log('Fetching user profile for user ID:', userId);
               const userProfileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
-              console.log('User profile exists:', userProfileResponse.data);
+              //console.log('User profile exists:', userProfileResponse.data);
               setHasProfile(true);
             } catch (err) {
               console.log('No user profile found:', err.response?.data || err.message);
@@ -97,7 +97,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <Routes>
+      <Routes >
         <Route path="/" element={<Home />} />
         <Route path="/all-doctors" element={<AllDoctors />} />
         <Route path="/doctors/:id" element={<DoctorPublicProfile />} />

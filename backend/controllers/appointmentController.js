@@ -7,25 +7,25 @@ const bookAppointment = async (req, res) => {
   const { doctorId, day, place, timeInterval } = req.body;
   const userId = req.user._id;
 
-  console.log('Booking request received:', { doctorId, day, place, timeInterval, userId }); // Debug
+  //console.log('Booking request received:', { doctorId, day, place, timeInterval, userId }); // Debug
 
   try {
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
-      console.log('Doctor not found:', doctorId); // Debug
+      //console.log('Doctor not found:', doctorId); // Debug
       return res.status(404).json({ message: 'Doctor not found' });
     }
 
     // Check if user is a doctor (already handled in frontend, but confirm here)
     if (req.user.role === 'doctor') {
-      console.log('Doctor attempted to book:', userId); // Debug
+      //console.log('Doctor attempted to book:', userId); // Debug
       return res.status(403).json({ message: 'Doctors cannot book appointments' });
     }
 
     // Find the specific schedule slot
     const scheduleDay = doctor.schedule.find((sched) => sched.day === day);
     if (!scheduleDay) {
-      console.log('Invalid schedule day:', day); // Debug
+      //console.log('Invalid schedule day:', day); // Debug
       return res.status(400).json({ message: 'Invalid schedule day' });
     }
 
@@ -36,7 +36,7 @@ const bookAppointment = async (req, res) => {
     );
 
     if (!scheduleSlot) {
-      console.log('Invalid schedule slot:', { day, place, timeInterval }); // Debug
+      //console.log('Invalid schedule slot:', { day, place, timeInterval }); // Debug
       return res.status(400).json({ message: 'Invalid schedule slot' });
     }
 
@@ -50,10 +50,10 @@ const bookAppointment = async (req, res) => {
       status: 'confirmed',
     });
 
-    console.log('Existing bookings:', existingBookings, 'Max patients:', scheduleSlot.maxPatients); // Debug
+    //console.log('Existing bookings:', existingBookings, 'Max patients:', scheduleSlot.maxPatients); // Debug
 
     if (existingBookings >= scheduleSlot.maxPatients) {
-      console.log('Booking full for slot:', { day, place, timeInterval }); // Debug
+      //console.log('Booking full for slot:', { day, place, timeInterval }); // Debug
       return res.status(400).json({ message: 'This time slot is fully booked. Please select another time.' });
     }
 
@@ -83,7 +83,7 @@ const bookAppointment = async (req, res) => {
     const appointmentMinute = appointmentTotalMinutes % 60;
     const appointmentTime = `${appointmentHour.toString().padStart(2, '0')}:${appointmentMinute.toString().padStart(2, '0')}`;
     
-    console.log('Calculated appointment time:', appointmentTime); // Debug
+    //console.log('Calculated appointment time:', appointmentTime); // Debug
 
     // Get today's date in DD/MM/YYYY format
     const today = new Date();
@@ -130,14 +130,14 @@ const bookAppointment = async (req, res) => {
             <p>Thank you for using our service!</p>
           `,
         });
-        console.log('Appointment confirmation email sent to:', user.email); // Debug
+        //console.log('Appointment confirmation email sent to:', user.email); // Debug
       } catch (emailError) {
         console.error('Failed to send confirmation email:', emailError); // Debug
         // Don't fail the appointment booking if email fails
       }
     }
 
-    console.log('Appointment created:', appointment); // Debug
+    //console.log('Appointment created:', appointment); // Debug
     res.status(201).json(appointment);
   } catch (error) {
     console.error('Book appointment error:', error.message, error.stack); // Debug
@@ -150,7 +150,7 @@ const getDoctorAppointments = async (req, res) => {
     const appointments = await Appointment.find({ doctor: req.params.doctorId, status: 'confirmed' })
       .populate('user', 'name email')
       .sort('bookedAt');
-    console.log('Doctor appointments retrieved:', appointments.length); // Debug
+    //console.log('Doctor appointments retrieved:', appointments.length); // Debug
     res.json(appointments);
   } catch (error) {
     console.error('Get doctor appointments error:', error.message, error.stack);
@@ -163,13 +163,13 @@ const getUserAppointments = async (req, res) => {
     // Check if we're getting appointments for a specific user ID
     const userId = req.params.userId || req.user._id;
     
-    console.log('Getting appointments for user:', userId); // Debug
+    //console.log('Getting appointments for user:', userId); // Debug
     
     const appointments = await Appointment.find({ user: userId })
       .populate('doctor', 'name specialist')
       .sort('bookedAt');
     
-    console.log('User appointments retrieved:', appointments.length, appointments); // Debug
+    //console.log('User appointments retrieved:', appointments.length, appointments); // Debug
     
     res.json(appointments);
   } catch (error) {

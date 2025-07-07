@@ -35,10 +35,10 @@ function DoctorForm() {
     const token = localStorage.getItem('accessToken');
     if (!token) return navigate('/login');
 
-    console.log('DoctorForm: doctorId from URL:', doctorId);
+    //console.log('DoctorForm: doctorId from URL:', doctorId);
     
     if (doctorId) {
-      console.log('DoctorForm: Fetching doctor data for ID:', doctorId);
+      //console.log('DoctorForm: Fetching doctor data for ID:', doctorId);
       fetchDoctor(token);
     } else {
       console.log('DoctorForm: No doctorId found, creating new doctor profile');
@@ -47,12 +47,12 @@ function DoctorForm() {
 
   const fetchDoctor = async (token) => {
     try {
-      console.log('DoctorForm: Fetching doctor data from API for ID:', doctorId);
+      //console.log('DoctorForm: Fetching doctor data from API for ID:', doctorId);
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/${doctorId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const doctor = response.data;
-      console.log('DoctorForm: Doctor data fetched successfully:', doctor);
+      //console.log('DoctorForm: Doctor data fetched successfully:', doctor);
       const updatedSchedule = doctor.schedule.map((sched) => ({
         ...sched,
         places: sched.places.map((place) => ({
@@ -159,7 +159,7 @@ function DoctorForm() {
     setIsSubmitting(true);
     setError('');
 
-    console.log('DoctorForm: handleSubmit called, doctorId:', doctorId);
+    //console.log('DoctorForm: handleSubmit called, doctorId:', doctorId);
 
     const token = localStorage.getItem('accessToken');
     if (!token) return navigate('/login');
@@ -201,24 +201,24 @@ function DoctorForm() {
         }));
         data.append('schedule', JSON.stringify(formattedSchedule));
       } else if (key === 'picture' && formData[key]) {
-        console.log('DoctorForm: Appending picture to FormData');
+        //console.log('DoctorForm: Appending picture to FormData');
         data.append('picture', formData[key]);
       } else if (key === 'existingPictureUrl') {
         // If no new picture is uploaded, use the existing one
         if (!formData.picture && formData[key]) {
-          console.log('DoctorForm: Using existing picture URL:', formData[key]);
+          //console.log('DoctorForm: Using existing picture URL:', formData[key]);
           data.append('existingPictureUrl', formData[key]);
         }
       } else if (key !== 'picture' && key !== 'existingPictureUrl') {
         data.append(key, formData[key]);
       }
     }
-    console.log('DoctorForm: Submitting FormData:', [...data.entries()]); // Debug FormData entries
+    //console.log('DoctorForm: Submitting FormData:', [...data.entries()]); // Debug FormData entries
 
     try {
       let response;
       if (doctorId) {
-        console.log('DoctorForm: Updating existing doctor profile with ID:', doctorId);
+        //console.log('DoctorForm: Updating existing doctor profile with ID:', doctorId);
         response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/${doctorId}`, data, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -226,7 +226,7 @@ function DoctorForm() {
           },
         });
       } else {
-        console.log('DoctorForm: Creating new doctor profile');
+        //console.log('DoctorForm: Creating new doctor profile');
         response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/doctors`, data, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -234,7 +234,7 @@ function DoctorForm() {
           },
         });
       }
-      console.log('DoctorForm: Submission successful, response:', response.data);
+      //console.log('DoctorForm: Submission successful, response:', response.data);
       navigate(`/profile/${response.data._id}`);
     } catch (error) {
       console.error('DoctorForm: Submission error:', error.response?.data || error.message);

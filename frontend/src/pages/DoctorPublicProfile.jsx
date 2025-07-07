@@ -30,7 +30,7 @@ function DoctorPublicProfile() {
       try {
         // Use the correct endpoint for public doctor profile
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/${id}`);
-        console.log('Fetch doctor response:', response.data);
+        //console.log('Fetch doctor response:', response.data);
         
         if (!response.data || Object.keys(response.data).length === 0) {
           throw new Error('No doctor data returned');
@@ -145,7 +145,7 @@ function DoctorPublicProfile() {
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          console.log('Book appointment response:', response.data); // Log response
+          //console.log('Book appointment response:', response.data); // Log response
           setToast({
             isOpen: true,
             title: 'Success',
@@ -210,7 +210,7 @@ function DoctorPublicProfile() {
         confirmText={toast.confirmText}
         showCancel={toast.showCancel}
       />
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-8 py-20">
         {/* Left Sidebar */}
         <div className="lg:w-1/3 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
           <div className="flex flex-col items-center">

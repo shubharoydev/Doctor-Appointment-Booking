@@ -20,7 +20,7 @@ const schema = buildSchema(`
 const root = {
   doctors: async () => {
     try {
-      console.log('GraphQL query for doctors executed (no API key)');
+      //console.log('GraphQL query for doctors executed (no API key)');
       const doctors = await Doctor.find({})
         .select('_id name experienceYears specialist fees picture')
         .lean();

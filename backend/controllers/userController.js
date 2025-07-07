@@ -1,7 +1,7 @@
 const UserProfile = require('../models/UserProfile');
 
 const createUserProfile = async (req, res) => {
-  console.log('Create user profile request received:', req.body, 'File:', req.file); // Debug
+  //console.log('Create user profile request received:', req.body, 'File:', req.file); // Debug
   const user = req.user;
 
   try {
@@ -11,13 +11,13 @@ const createUserProfile = async (req, res) => {
     if (req.file) {
       // If using Cloudinary, the file path will be in req.file.path
       profileData.picture = req.file.path; // Cloudinary URL
-      console.log('Image uploaded to Cloudinary:', req.file.path); // Debug
+      //console.log('Image uploaded to Cloudinary:', req.file.path); // Debug
     } else {
       console.log('No file uploaded in createUserProfile'); // Debug
     }
     
     const profile = await UserProfile.create(profileData);
-    console.log('User profile created:', profile._id); // Debug
+    //console.log('User profile created:', profile._id); // Debug
     res.status(201).json(profile);
   } catch (error) {
     console.error('Create user profile error:', error.message, error.stack); // Debug
@@ -29,7 +29,7 @@ const getUserProfile = async (req, res) => {
   // Check if we're getting a specific profile by ID
   const profileId = req.params.id;
   
-  console.log('Get user profile request received for:', profileId || req.user._id); // Debug
+  //console.log('Get user profile request received for:', profileId || req.user._id); // Debug
   
   try {
     let profile;
@@ -41,11 +41,11 @@ const getUserProfile = async (req, res) => {
     }
     
     if (!profile) {
-      console.log('User profile not found'); // Debug
+      //console.log('User profile not found'); // Debug
       return res.status(404).json({ message: 'User profile not found' });
     }
     
-    console.log('User profile retrieved:', profile._id); // Debug
+    //console.log('User profile retrieved:', profile._id); // Debug
     res.json(profile);
   } catch (error) {
     console.error('Get user profile error:', error.message, error.stack); // Debug
@@ -54,7 +54,7 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateUserProfile = async (req, res) => {
-  console.log('Update user profile request received:', req.body, 'File:', req.file); // Debug
+ // console.log('Update user profile request received:', req.body, 'File:', req.file); // Debug
   
   // Check if we're updating a specific profile by ID
   const profileId = req.params.id;
@@ -70,7 +70,7 @@ const updateUserProfile = async (req, res) => {
     }
     
     if (!profile) {
-      console.log('User profile not found, creating new'); // Debug
+      //console.log('User profile not found, creating new'); // Debug
       
       const profileData = { ...req.body, user: user._id };
       
@@ -78,7 +78,7 @@ const updateUserProfile = async (req, res) => {
       if (req.file) {
         // If using Cloudinary, the file path will be in req.file.path
         profileData.picture = req.file.path; // Cloudinary URL
-        console.log('Image uploaded to Cloudinary:', req.file.path); // Debug
+        //console.log('Image uploaded to Cloudinary:', req.file.path); // Debug
       }
       
       profile = await UserProfile.create(profileData);
@@ -89,11 +89,11 @@ const updateUserProfile = async (req, res) => {
       if (req.file) {
         // If using Cloudinary, the file path will be in req.file.path
         updatedData.picture = req.file.path; // Update picture if new file is uploaded
-        console.log('Image updated on Cloudinary:', req.file.path); // Debug
+       // console.log('Image updated on Cloudinary:', req.file.path); // Debug
       } else if (req.body.existingPictureUrl) {
         // If no new picture is uploaded but there's an existing one, keep it
         updatedData.picture = req.body.existingPictureUrl;
-        console.log('Keeping existing picture URL:', req.body.existingPictureUrl); // Debug
+        //console.log('Keeping existing picture URL:', req.body.existingPictureUrl); // Debug
         delete updatedData.existingPictureUrl; // Remove from data to be saved
       }
       
@@ -101,7 +101,7 @@ const updateUserProfile = async (req, res) => {
       await profile.save();
     }
     
-    console.log('User profile updated:', profile._id); // Debug
+    //console.log('User profile updated:', profile._id); // Debug
     res.json(profile);
   } catch (error) {
     console.error('Update user profile error:', error.message, error.stack); // Debug
@@ -113,7 +113,7 @@ const deleteUserProfile = async (req, res) => {
   // Check if we're deleting a specific profile by ID
   const profileId = req.params.id;
   
-  console.log('Delete user profile request received for:', profileId || req.user._id); // Debug
+  //console.log('Delete user profile request received for:', profileId || req.user._id); // Debug
   
   try {
     let profile;
@@ -125,11 +125,11 @@ const deleteUserProfile = async (req, res) => {
     }
     
     if (!profile) {
-      console.log('User profile not found'); // Debug
+      //console.log('User profile not found'); // Debug
       return res.status(404).json({ message: 'User profile not found' });
     }
     
-    console.log('User profile deleted:', profile._id); // Debug
+    //console.log('User profile deleted:', profile._id); // Debug
     res.json({ message: 'User profile deleted' });
   } catch (error) {
     console.error('Delete user profile error:', error.message, error.stack); // Debug

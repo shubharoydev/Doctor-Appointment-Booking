@@ -6,7 +6,7 @@ const redisCache = (generateCacheKey) => async (req, res, next) => {
   try {
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
-      console.log(`Cache hit for key: ${cachedData}:`);
+      //console.log(`Cache hit for key: ${cachedData}:`);
       return res.status(200).json(JSON.parse(cachedData));
     }
     const originalJson = res.json.bind(res);
@@ -31,7 +31,7 @@ const clearCache = async (cacheKey) => {
   const redisClient = await redisClientPromise;
   try {
     const result = await redisClient.del(cacheKey);
-    console.log(`Cleared cache for ${cacheKey}: ${result}`);
+    //console.log(`Cleared cache for ${cacheKey}: ${result}`);
   } catch (error) {
     console.error(`Error clearing cache for ${cacheKey}:`, error);
   }

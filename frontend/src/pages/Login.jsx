@@ -17,14 +17,14 @@ function Login({ role }) {
     setIsLoading(true);
     
     try {
-      console.log('Attempting login with:', { email: formData.email, role });
+     // console.log('Attempting login with:', { email: formData.email, role });
       
       const endpoint = '/api/auth/login';
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}${endpoint}`, formData, {
         headers: { 'Content-Type': 'application/json' },
       });
       
-      console.log('Login successful, tokens received:', response.data);
+      //console.log('Login successful, tokens received:', response.data);
       
       // Store tokens and role
       localStorage.setItem('accessToken', response.data.accessToken);
@@ -43,18 +43,18 @@ function Login({ role }) {
         
         // Make sure we're using the correct ID property
         const userId = userResponse.data._id || userResponse.data.id || response.data.userId;
-        console.log(`User ID retrieved for profile check:`, userId);
+        //console.log(`User ID retrieved for profile check:`, userId);
 
         // Check for profile based on role from response
         if (userRole === 'doctor') {
           try {
-            console.log('Fetching doctor profile for user ID:', userId);
+            //console.log('Fetching doctor profile for user ID:', userId);
             const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/doctors/by-user/${userId}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             
             if (profileResponse.data) {
-              console.log('Doctor profile found, redirecting to profile:', profileResponse.data._id);
+              //console.log('Doctor profile found, redirecting to profile:', profileResponse.data._id);
               navigate(`/profile/${profileResponse.data._id}`);
               return;
             } else {
@@ -111,7 +111,7 @@ function Login({ role }) {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-25">
       {isLoading && <Loader text="Logging in..." />}
       <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">{`${role.charAt(0).toUpperCase() + role.slice(1)} Login`}</h2>
