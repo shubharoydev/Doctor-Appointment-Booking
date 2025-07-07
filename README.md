@@ -2,7 +2,7 @@
 
 A robust **MERN Stack** web application for managing doctor profiles, scheduling appointments, and delivering seamless healthcare booking experiences. It includes **role-based access**, **OTP authentication**, **image uploads**, **GraphQL API integration**, and performance optimization using **Redis**.
 
-🔗 **Live Demo**: https://doctor-appointment-booking-bice.vercel.app
+🔗 **Live Demo**: https://medilynk.vercel.app
 
 ---
 
